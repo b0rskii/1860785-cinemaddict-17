@@ -1,7 +1,7 @@
 # Проект «Киноман»
 
 * Студент: [Дмитрий Гладкий](https://up.htmlacademy.ru/ecmascript/17/user/1860785).
-* Наставник: `Неизвестно`.
+* Наставник: [Дмитрий Гуляев](https://htmlacademy.ru/profile/dima).
 
 ---
 
