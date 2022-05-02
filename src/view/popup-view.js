@@ -18,9 +18,9 @@ const getFilmComments = (film, comments) => {
   const filmComments = [];
 
   film.commentsId.forEach((item) => {
-    for (let i = 0; i < comments.length; i++) {
-      if (item === comments[i].id) {
-        filmComments.push(comments[i]);
+    for (const comment of comments) {
+      if (item === comment.id) {
+        filmComments.push(comment);
         break;
       }
     }
@@ -53,7 +53,6 @@ const createCommentsTemplate = (comments) => {
 
 export default class PopupView {
   constructor (film, comments) {
-    this.film = film;
     this.poster = film.filmInfo.poster;
     this.ageRating = film.filmInfo.ageRating;
     this.title = film.filmInfo.title;

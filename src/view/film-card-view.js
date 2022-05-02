@@ -6,7 +6,6 @@ const RELEASE_DATE_FORMAT = 'YYYY';
 
 export default class FilmCardView {
   constructor (film) {
-    this.film = film;
     this.filmId = film.id;
     this.title = film.filmInfo.title;
     this.totalRating = film.filmInfo.totalRating;
