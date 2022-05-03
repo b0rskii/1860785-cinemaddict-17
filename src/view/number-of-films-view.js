@@ -1,6 +1,7 @@
 import {createElement} from '../render.js';
 
-export default class NumberOfFilmesView {
+export default class NumberOfFilmsView {
+
   getTemplate() {
     return `<p>
               130 291 movies inside
