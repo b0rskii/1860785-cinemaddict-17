@@ -1,24 +1,28 @@
 import {createElement} from '../render.js';
 
 export default class ExtraSectionView {
+  #element = null;
+
+  #title = null;
+
   constructor(title) {
-    this.title = title;
+    this.#title = title;
   }
 
-  getTemplate() {
+  get template() {
     return `<section class="films-list films-list--extra">
-              <h2 class="films-list__title">${this.title}</h2>
+              <h2 class="films-list__title">${this.#title}</h2>
             </section>`;
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
     }
-    return this.element;
+    return this.#element;
   }
 
   removeElement() {
-    this.element = null;
+    this.#element = null;
   }
 }

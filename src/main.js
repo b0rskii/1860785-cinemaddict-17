@@ -13,6 +13,6 @@ const filmsModel = new FilmsModel();
 
 render(new UserView(), header);
 
-new MainPresenter().init(main, filmsModel);
+new MainPresenter(main, filmsModel).init();
 
 render(new NumberOfFilmsView(), footerStatistics);

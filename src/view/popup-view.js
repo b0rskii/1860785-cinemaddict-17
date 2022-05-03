@@ -14,21 +14,6 @@ const createGenreTemplate = (genres) => {
   return elements.join('');
 };
 
-const getFilmComments = (film, comments) => {
-  const filmComments = [];
-
-  film.commentsId.forEach((item) => {
-    for (const comment of comments) {
-      if (item === comment.id) {
-        filmComments.push(comment);
-        break;
-      }
-    }
-  });
-
-  return filmComments;
-};
-
 const createCommentsTemplate = (comments) => {
   const elements = [];
 
@@ -52,26 +37,60 @@ const createCommentsTemplate = (comments) => {
 };
 
 export default class PopupView {
+  #element = null;
+
+  #poster = null;
+  #ageRating = null;
+  #title = null;
+  #alternativeTitle = null;
+  #totalRating = null;
+  #director = null;
+  #writers = null;
+  #actors = null;
+  #releaseDate = null;
+  #runtime = null;
+  #releaseCountry = null;
+  #genre = null;
+  #genresTerm = null;
+  #description = null;
+  #commentCount = null;
+  #filmComments = null;
+
   constructor (film, comments) {
-    this.poster = film.filmInfo.poster;
-    this.ageRating = film.filmInfo.ageRating;
-    this.title = film.filmInfo.title;
-    this.alternativeTitle = film.filmInfo.alternativeTitle;
-    this.totalRating = film.filmInfo.totalRating;
-    this.director = film.filmInfo.director;
-    this.writers = film.filmInfo.writers;
-    this.actors = film.filmInfo.actors;
-    this.releaseDate = film.filmInfo.release.date;
-    this.runtime = film.filmInfo.runtime;
-    this.releaseCountry = film.filmInfo.release.releaseCountry;
-    this.genre = film.filmInfo.genre;
-    this.genresTerm = this.genre.length > 1 ? 'Genres' : 'Genre';
-    this.description = film.filmInfo.description;
-    this.commentCount = film.commentsId.length;
-    this.filmComments = getFilmComments(film, comments);
+    this.#poster = film.filmInfo.poster;
+    this.#ageRating = film.filmInfo.ageRating;
+    this.#title = film.filmInfo.title;
+    this.#alternativeTitle = film.filmInfo.alternativeTitle;
+    this.#totalRating = film.filmInfo.totalRating;
+    this.#director = film.filmInfo.director;
+    this.#writers = film.filmInfo.writers;
+    this.#actors = film.filmInfo.actors;
+    this.#releaseDate = film.filmInfo.release.date;
+    this.#runtime = film.filmInfo.runtime;
+    this.#releaseCountry = film.filmInfo.release.releaseCountry;
+    this.#genre = film.filmInfo.genre;
+    this.#genresTerm = this.#genre.length > 1 ? 'Genres' : 'Genre';
+    this.#description = film.filmInfo.description;
+    this.#commentCount = film.commentsId.length;
+    this.#filmComments = this.#getFilmComments(film, comments);
   }
 
-  getTemplate() {
+  #getFilmComments = (film, comments) => {
+    const filmComments = [];
+
+    film.commentsId.forEach((item) => {
+      for (const comment of comments) {
+        if (item === comment.id) {
+          filmComments.push(comment);
+          break;
+        }
+      }
+    });
+
+    return filmComments;
+  };
+
+  get template() {
     return `<section class="film-details">
               <form class="film-details__inner" action="" method="get">
                 <div class="film-details__top-container">
@@ -80,58 +99,58 @@ export default class PopupView {
                   </div>
                   <div class="film-details__info-wrap">
                     <div class="film-details__poster">
-                      <img class="film-details__poster-img" src=${this.poster} alt="">
+                      <img class="film-details__poster-img" src=${this.#poster} alt="">
 
-                      <p class="film-details__age">${this.ageRating}+</p>
+                      <p class="film-details__age">${this.#ageRating}+</p>
                     </div>
 
                     <div class="film-details__info">
                       <div class="film-details__info-head">
                         <div class="film-details__title-wrap">
-                          <h3 class="film-details__title">${this.title}</h3>
-                          <p class="film-details__title-original">Original: ${this.alternativeTitle}</p>
+                          <h3 class="film-details__title">${this.#title}</h3>
+                          <p class="film-details__title-original">Original: ${this.#alternativeTitle}</p>
                         </div>
 
                         <div class="film-details__rating">
-                          <p class="film-details__total-rating">${this.totalRating}</p>
+                          <p class="film-details__total-rating">${this.#totalRating}</p>
                         </div>
                       </div>
 
                       <table class="film-details__table">
                         <tr class="film-details__row">
                           <td class="film-details__term">Director</td>
-                          <td class="film-details__cell">${this.director}</td>
+                          <td class="film-details__cell">${this.#director}</td>
                         </tr>
                         <tr class="film-details__row">
                           <td class="film-details__term">Writers</td>
-                          <td class="film-details__cell">${this.writers.join(', ')}</td>
+                          <td class="film-details__cell">${this.#writers.join(', ')}</td>
                         </tr>
                         <tr class="film-details__row">
                           <td class="film-details__term">Actors</td>
-                          <td class="film-details__cell">${this.actors.join(', ')}</td>
+                          <td class="film-details__cell">${this.#actors.join(', ')}</td>
                         </tr>
                         <tr class="film-details__row">
                           <td class="film-details__term">Release Date</td>
-                          <td class="film-details__cell">${formatDate(this.releaseDate, Format.RELEASE_DATE)}</td>
+                          <td class="film-details__cell">${formatDate(this.#releaseDate, Format.RELEASE_DATE)}</td>
                         </tr>
                         <tr class="film-details__row">
                           <td class="film-details__term">Runtime</td>
-                          <td class="film-details__cell">${formatRuntime(this.runtime)}</td>
+                          <td class="film-details__cell">${formatRuntime(this.#runtime)}</td>
                         </tr>
                         <tr class="film-details__row">
                           <td class="film-details__term">Country</td>
-                          <td class="film-details__cell">${this.releaseCountry}</td>
+                          <td class="film-details__cell">${this.#releaseCountry}</td>
                         </tr>
                         <tr class="film-details__row">
-                          <td class="film-details__term">${this.genresTerm}</td>
+                          <td class="film-details__term">${this.#genresTerm}</td>
                           <td class="film-details__cell">
-                            ${createGenreTemplate(this.genre)}
+                            ${createGenreTemplate(this.#genre)}
                           </td>
                         </tr>
                       </table>
 
                       <p class="film-details__film-description">
-                        ${this.description}
+                        ${this.#description}
                       </p>
                     </div>
                   </div>
@@ -145,10 +164,10 @@ export default class PopupView {
 
                 <div class="film-details__bottom-container">
                   <section class="film-details__comments-wrap">
-                    <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${this.commentCount}</span></h3>
+                    <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${this.#commentCount}</span></h3>
 
                     <ul class="film-details__comments-list">
-                      ${createCommentsTemplate(this.filmComments)}
+                      ${createCommentsTemplate(this.#filmComments)}
                     </ul>
 
                     <div class="film-details__new-comment">
@@ -186,14 +205,14 @@ export default class PopupView {
             </section>`;
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
     }
-    return this.element;
+    return this.#element;
   }
 
   removeElement() {
-    this.element = null;
+    this.#element = null;
   }
 }

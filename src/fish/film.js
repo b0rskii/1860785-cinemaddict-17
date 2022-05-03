@@ -1,8 +1,8 @@
 import {getRandomInteger, getConsecutiveNumbers} from '../util.js';
 
 const Count = {
-  FILMS: 5,
-  COMMENTS: 25
+  FILMS: 22,
+  COMMENTS: 110
 };
 
 const FilmComments = {
