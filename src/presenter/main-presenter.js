@@ -20,53 +20,92 @@ const Title = {
 };
 
 export default class MainPresenter {
-  filmsSection = new FilmsSectionView();
-  filmsListSection = new FilmsListSectionView();
-  filmsListContainer = new FilmsListContainerView();
-  firstExtraSection = new ExtraSectionView(Title.FIRST_EXTRA_SECTION);
-  secondExtraSection = new ExtraSectionView(Title.SECOND_EXTRA_SECTION);
-  topRatedFilmsContainer = new FilmsListContainerView();
-  mostCommentedFilmsContainer = new FilmsListContainerView();
+  #container = null;
+  #filmsModel = null;
 
-  init(container, filmsModel) {
-    this.container = container;
-    this.filmsModel = filmsModel;
-    this.mainFilms = [...this.filmsModel.getFilms()];
-    this.comments = [...this.filmsModel.getComments()];
+  #mainFilms = [];
+  #comments = [];
 
-    render(new NavigationView(), this.container);
-    render(new SortView(), this.container);
-    render(this.filmsSection, this.container);
-    render(this.filmsListSection, this.filmsSection.getElement());
-    render(this.filmsListContainer, this.filmsListSection.getElement());
+  #filmsSection = new FilmsSectionView();
+  #filmsListSection = new FilmsListSectionView();
+  #filmsListContainer = new FilmsListContainerView();
+  #firstExtraSection = new ExtraSectionView(Title.FIRST_EXTRA_SECTION);
+  #secondExtraSection = new ExtraSectionView(Title.SECOND_EXTRA_SECTION);
+  #topRatedFilmsContainer = new FilmsListContainerView();
+  #mostCommentedFilmsContainer = new FilmsListContainerView();
+
+  constructor (container, filmsModel) {
+    this.#container = container;
+    this.#filmsModel = filmsModel;
+  }
+
+  init = () => {
+    this.#mainFilms = [...this.#filmsModel.films];
+    this.#comments = [...this.#filmsModel.comments];
+
+    render(new NavigationView(), this.#container);
+    render(new SortView(), this.#container);
+    render(this.#filmsSection, this.#container);
+    render(this.#filmsListSection, this.#filmsSection.element);
+    render(this.#filmsListContainer, this.#filmsListSection.element);
 
     for (let i = 0; i < RenderCount.FILM_CARDS; i++) {
-      render(new FilmCardView(this.mainFilms[i]), this.filmsListContainer.getElement());
+      const filmCardComponent = new FilmCardView(this.#mainFilms[i]);
+
+      render(filmCardComponent, this.#filmsListContainer.element);
+
+      filmCardComponent.element.addEventListener('click', this.#onFilmCardClick);
     }
 
-    render(new ShowMoreButtonView, this.filmsListSection.getElement());
-    render(this.firstExtraSection, this.filmsSection.getElement());
-    render(this.secondExtraSection, this.filmsSection.getElement());
-    render(this.topRatedFilmsContainer, this.firstExtraSection.getElement());
-    render(this.mostCommentedFilmsContainer, this.secondExtraSection.getElement());
+    render(new ShowMoreButtonView, this.#filmsListSection.element);
+    render(this.#firstExtraSection, this.#filmsSection.element);
+    render(this.#secondExtraSection, this.#filmsSection.element);
+    render(this.#topRatedFilmsContainer, this.#firstExtraSection.element);
+    render(this.#mostCommentedFilmsContainer, this.#secondExtraSection.element);
 
     for (let i = 0; i < RenderCount.FILM_CARDS_EXTRA; i++) {
-      render(new FilmCardView(this.mainFilms[i]), this.topRatedFilmsContainer.getElement());
-      render(new FilmCardView(this.mainFilms[i]), this.mostCommentedFilmsContainer.getElement());
+      render(new FilmCardView(this.#mainFilms[i]), this.#topRatedFilmsContainer.element);
+      render(new FilmCardView(this.#mainFilms[i]), this.#mostCommentedFilmsContainer.element);
     }
+  };
 
-    const filmCards = document.querySelectorAll('.film-card');
+  #closePopup = (body) => {
+    body.querySelector('.film-details').remove();
+    body.classList.remove('hide-overflow');
+    document.removeEventListener('keydown', this.#onPopupEscapeKeydown);
+  };
 
-    filmCards.forEach((item) => item.addEventListener('click', (evt) => {
-      const filmId = evt.target.getAttribute('data-id') - 1;
+  #onPopupEscapeKeydown = (evt) => {
+    if (evt.key === 'Escape' || evt.key === 'Esc') {
+      const body = document.querySelector('body');
 
-      render(new PopupView(this.mainFilms[filmId], this.comments), document.querySelector('body'));
+      this.#closePopup(body);
+    }
+  };
 
-      const popupCloseButton = document.querySelector('.film-details__close-btn');
+  #onFilmCardClick = (evt) => {
+    const filmId = evt.target.getAttribute('data-id') - 1;
+    const popupComponent = new PopupView(this.#mainFilms[filmId], this.#comments);
+    const body = document.querySelector('body');
+
+    const renderPopup = () => {
+      render(popupComponent, body);
+      body.classList.add('hide-overflow');
+
+      const popupCloseButton = popupComponent.element.querySelector('.film-details__close-btn');
 
       popupCloseButton.addEventListener('click', () => {
-        document.querySelector('.film-details').remove();
+        this.#closePopup(body);
       });
-    }));
-  }
+
+      document.addEventListener('keydown', this.#onPopupEscapeKeydown);
+    };
+
+    if (body.lastElementChild.matches('section.film-details')) {
+      this.#closePopup(body);
+      renderPopup();
+    } else {
+      renderPopup();
+    }
+  };
 }
