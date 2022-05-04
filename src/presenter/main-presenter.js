@@ -130,29 +130,31 @@ export default class MainPresenter {
   };
 
   #onFilmCardClick = (evt) => {
-    const filmId = evt.target.getAttribute('data-id') - 1;
-    const popupComponent = new PopupView(this.#mainFilms[filmId], this.#comments);
-    const body = document.querySelector('body');
+    if (evt.target.closest('.film-card') && !evt.target.classList.contains('film-card__controls-item')) {
+      const filmId = evt.target.closest('.film-card').getAttribute('data-id') - 1;
+      const popupComponent = new PopupView(this.#mainFilms[filmId], this.#comments);
+      const body = document.querySelector('body');
 
-    const renderPopup = () => {
-      fixScrollbarOpen();
-      render(popupComponent, body);
-      body.classList.add('hide-overflow');
+      const renderPopup = () => {
+        fixScrollbarOpen();
+        render(popupComponent, body);
+        body.classList.add('hide-overflow');
 
-      const popupCloseButton = popupComponent.element.querySelector('.film-details__close-btn');
+        const popupCloseButton = popupComponent.element.querySelector('.film-details__close-btn');
 
-      popupCloseButton.addEventListener('click', () => {
+        popupCloseButton.addEventListener('click', () => {
+          this.#closePopup(body);
+        });
+
+        document.addEventListener('keydown', this.#onPopupEscapeKeydown);
+      };
+
+      if (body.lastElementChild.matches('section.film-details')) {
         this.#closePopup(body);
-      });
-
-      document.addEventListener('keydown', this.#onPopupEscapeKeydown);
-    };
-
-    if (body.lastElementChild.matches('section.film-details')) {
-      this.#closePopup(body);
-      renderPopup();
-    } else {
-      renderPopup();
+        renderPopup();
+      } else {
+        renderPopup();
+      }
     }
   };
 }
