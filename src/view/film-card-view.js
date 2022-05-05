@@ -32,18 +32,18 @@ export default class FilmCardView {
   get template() {
     return `<article class="film-card" data-id="${this.#filmId}">
               <a class="film-card__link">
-                <h3 class="film-card__title" data-id="${this.#filmId}">${this.#title}</h3>
-                <p class="film-card__rating" data-id="${this.#filmId}">${this.#totalRating}</p>
-                <p class="film-card__info" data-id="${this.#filmId}">
-                  <span class="film-card__year" data-id="${this.#filmId}">${formatDate(this.#releaseDate, RELEASE_DATE_FORMAT)}</span>
-                  <span class="film-card__duration" data-id="${this.#filmId}">${formatRuntime(this.#runtime)}</span>
-                  <span class="film-card__genre" data-id="${this.#filmId}">${this.#genre[0]}</span>
+                <h3 class="film-card__title">${this.#title}</h3>
+                <p class="film-card__rating">${this.#totalRating}</p>
+                <p class="film-card__info">
+                  <span class="film-card__year">${formatDate(this.#releaseDate, RELEASE_DATE_FORMAT)}</span>
+                  <span class="film-card__duration">${formatRuntime(this.#runtime)}</span>
+                  <span class="film-card__genre">${this.#genre[0]}</span>
                 </p>
-                <img src=${this.#poster} alt="" class="film-card__poster" data-id="${this.#filmId}">
-                <p class="film-card__description" data-id="${this.#filmId}">${formatDescription(this.#description, DESCRIPTION_MAX_LENGTH)}</p>
-                <span class="film-card__comments" data-id="${this.#filmId}">${this.#comments.length} comments</span>
+                <img src=${this.#poster} alt="" class="film-card__poster">
+                <p class="film-card__description">${formatDescription(this.#description, DESCRIPTION_MAX_LENGTH)}</p>
+                <span class="film-card__comments">${this.#comments.length} comments</span>
               </a>
-              <div class="film-card__controls" data-id="${this.#filmId}">
+              <div class="film-card__controls">
                 <button class="film-card__controls-item film-card__controls-item--add-to-watchlist" type="button">Add to watchlist</button>
                 <button class="film-card__controls-item film-card__controls-item--mark-as-watched" type="button">Mark as watched</button>
                 <button class="film-card__controls-item film-card__controls-item--favorite" type="button">Mark as favorite</button>

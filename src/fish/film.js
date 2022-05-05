@@ -1,13 +1,19 @@
-import {getRandomInteger, getConsecutiveNumbers} from '../util.js';
+import {getRandomInteger, getRandomNoInteger, getConsecutiveNumbers} from '../util.js';
 
 const Count = {
   FILMS: 22,
-  COMMENTS: 110
+  COMMENTS: 220
 };
 
 const FilmComments = {
   MIN: 0,
-  MAX: 5
+  MAX: 10
+};
+
+const totalRaiting = {
+  MIN: 3,
+  MAX: 8,
+  DECIMAL_PLACES: 1
 };
 
 const filmsIndificators = getConsecutiveNumbers(Count.FILMS);
@@ -47,6 +53,8 @@ const generateTitle = () => {
 
   return titles[randomIndex];
 };
+
+const generateTotalRaiting = () => getRandomNoInteger(totalRaiting.MIN, totalRaiting.MAX, totalRaiting.DECIMAL_PLACES);
 
 const generateDescription = () => {
   const descriptions = [
@@ -104,7 +112,7 @@ export const generateFilm = () => ({
   filmInfo: {
     title: generateTitle(),
     alternativeTitle: 'Laziness Who Sold Themselves',
-    totalRating: 5.3,
+    totalRating: generateTotalRaiting(),
     poster: generatePoster(),
     ageRating: 0,
     director: 'Tom Ford',
