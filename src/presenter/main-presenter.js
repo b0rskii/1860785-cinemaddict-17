@@ -8,8 +8,8 @@ import FilmCardView from '../view/film-card-view';
 import ShowMoreButtonView from '../view/show-more-button-view.js';
 import ExtraSectionView from '../view/extra-section-view.js';
 import PopupView from '../view/popup-view.js';
-import {render} from '../render.js';
-import {fixScrollbarOpen, fixScrollbarClose} from '../util.js';
+import {render} from '../framework/render.js';
+import {fixScrollbarOpen, fixScrollbarClose} from '../utils/common.js';
 
 const RenderCount = {
   FILM_CARDS: 5,
@@ -66,9 +66,7 @@ export default class MainPresenter {
         this.#renderPartFilmCards(RenderCount.FILM_CARDS);
         render(this.#showMoreButton, this.#filmsListSection.element);
 
-        this.#showMoreButton.element.addEventListener('click', () => {
-          this.#renderPartFilmCards(RenderCount.FILM_CARDS);
-        });
+        this.#showMoreButton.setClickHandler(() => this.#renderPartFilmCards(RenderCount.FILM_CARDS));
       } else {
         this.#renderPartFilmCards(this.#mainFilms.length);
       }
@@ -85,8 +83,8 @@ export default class MainPresenter {
         render(firstExtrafilmCardComponent, this.#firstExtraFilmsContainer.element);
         render(secondExtraFilmCardComponent, this.#secondExtraFilmsContainer.element);
 
-        firstExtrafilmCardComponent.element.addEventListener('click', this.#onFilmCardClick);
-        secondExtraFilmCardComponent.element.addEventListener('click', this.#onFilmCardClick);
+        firstExtrafilmCardComponent.setClickHandler(this.#onFilmCardClick);
+        secondExtraFilmCardComponent.setClickHandler(this.#onFilmCardClick);
       }
     }
   };
@@ -108,7 +106,7 @@ export default class MainPresenter {
 
       render(filmCardComponent, this.#filmsListContainer.element);
 
-      filmCardComponent.element.addEventListener('click', this.#onFilmCardClick);
+      filmCardComponent.setClickHandler(this.#onFilmCardClick);
     }
 
     this.#renderedFilmCardsCount += renderCount;
@@ -140,11 +138,7 @@ export default class MainPresenter {
         render(popupComponent, body);
         body.classList.add('hide-overflow');
 
-        const popupCloseButton = popupComponent.element.querySelector('.film-details__close-btn');
-
-        popupCloseButton.addEventListener('click', () => {
-          this.#closePopup(body);
-        });
+        popupComponent.setClickHandler(() => this.#closePopup(body));
 
         document.addEventListener('keydown', this.#onPopupEscapeKeydown);
       };

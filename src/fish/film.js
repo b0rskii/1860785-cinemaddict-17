@@ -1,23 +1,23 @@
-import {getRandomInteger, getRandomNoInteger, getConsecutiveNumbers} from '../util.js';
+import {getRandomInteger, getRandomNoInteger, getConsecutiveNumbers} from '../utils/common.js';
 
-const Count = {
+const Amount = {
   FILMS: 22,
   COMMENTS: 220
 };
 
-const FilmComments = {
+const NumberFilmComments = {
   MIN: 0,
   MAX: 10
 };
 
-const totalRaiting = {
+const TotalRaiting = {
   MIN: 3,
   MAX: 8,
   DECIMAL_PLACES: 1
 };
 
-const filmsIndificators = getConsecutiveNumbers(Count.FILMS);
-const commentsIndificators = getConsecutiveNumbers(Count.COMMENTS);
+const filmsIndificators = getConsecutiveNumbers(Amount.FILMS);
+const commentsIndificators = getConsecutiveNumbers(Amount.COMMENTS);
 const filmCommentsIndificators = commentsIndificators.slice();
 
 const generateFilmsId = () => filmsIndificators.shift();
@@ -54,7 +54,7 @@ const generateTitle = () => {
   return titles[randomIndex];
 };
 
-const generateTotalRaiting = () => getRandomNoInteger(totalRaiting.MIN, totalRaiting.MAX, totalRaiting.DECIMAL_PLACES);
+const generateTotalRaiting = () => getRandomNoInteger(TotalRaiting.MIN, TotalRaiting.MAX, TotalRaiting.DECIMAL_PLACES);
 
 const generateDescription = () => {
   const descriptions = [
@@ -89,7 +89,7 @@ const generateGenres = () => {
   return genres.splice(getRandomInteger(0, genres.length - 1), genres.length);
 };
 
-const generateCommentsIdToFilm = () => filmCommentsIndificators.splice(0, getRandomInteger(FilmComments.MIN, FilmComments.MAX));
+const generateCommentsIdToFilm = () => filmCommentsIndificators.splice(0, getRandomInteger(NumberFilmComments.MIN, NumberFilmComments.MAX));
 
 const generateCommentId = () => commentsIndificators.shift();
 
@@ -106,7 +106,7 @@ const generateEmoji = () => {
   return emojis[randomIndex];
 };
 
-export const generateFilm = () => ({
+const generateFilm = () => ({
   id: generateFilmsId(),
   commentsId: generateCommentsIdToFilm(),
   filmInfo: {
@@ -141,7 +141,7 @@ export const generateFilm = () => ({
   }
 });
 
-export const generateComment = () => ({
+const generateComment = () => ({
   id: generateCommentId(),
   author: 'Ilya O\'Reilly',
   comment: 'a film that changed my life, a true masterpiece, post-credit scene was just amazing omg.',
@@ -149,4 +149,4 @@ export const generateComment = () => ({
   emotion: generateEmoji()
 });
 
-export {Count};
+export {Amount, generateFilm, generateComment};

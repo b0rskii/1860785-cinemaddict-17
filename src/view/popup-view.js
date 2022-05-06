@@ -1,5 +1,5 @@
-import {createElement} from '../render.js';
-import {formatRuntime, formatDate} from '../util.js';
+import AbstractView from '../framework/view/abstract-view.js';
+import {formatRuntime, formatDate} from '../utils/film.js';
 
 const Format = {
   RELEASE_DATE: 'DD MMMM YYYY',
@@ -36,9 +36,7 @@ const createCommentsTemplate = (comments) => {
   return elements.join('');
 };
 
-export default class PopupView {
-  #element = null;
-
+export default class PopupView extends AbstractView {
   #poster = null;
   #ageRating = null;
   #title = null;
@@ -57,6 +55,7 @@ export default class PopupView {
   #filmComments = null;
 
   constructor (film, comments) {
+    super();
     this.#poster = film.filmInfo.poster;
     this.#ageRating = film.filmInfo.ageRating;
     this.#title = film.filmInfo.title;
@@ -205,14 +204,12 @@ export default class PopupView {
             </section>`;
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-    return this.#element;
-  }
+  setClickHandler = (callback) => {
+    this._callback.closeButtonClick = callback;
+    this.element.querySelector('.film-details__close-btn').addEventListener('click', this.#closeButtonClickHandler);
+  };
 
-  removeElement() {
-    this.#element = null;
-  }
+  #closeButtonClickHandler = () => {
+    this._callback.closeButtonClick();
+  };
 }
