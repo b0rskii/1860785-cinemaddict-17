@@ -71,23 +71,8 @@ export default class PopupView extends AbstractView {
     this.#genresTerm = this.#genre.length > 1 ? 'Genres' : 'Genre';
     this.#description = film.filmInfo.description;
     this.#commentCount = film.commentsId.length;
-    this.#filmComments = this.#getFilmComments(film, comments);
+    this.#filmComments = comments;
   }
-
-  #getFilmComments = (film, comments) => {
-    const filmComments = [];
-
-    film.commentsId.forEach((item) => {
-      for (const comment of comments) {
-        if (item === comment.id) {
-          filmComments.push(comment);
-          break;
-        }
-      }
-    });
-
-    return filmComments;
-  };
 
   get template() {
     return `<section class="film-details">

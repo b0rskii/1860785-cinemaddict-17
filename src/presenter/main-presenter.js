@@ -8,7 +8,7 @@ import FilmCardView from '../view/film-card-view';
 import ShowMoreButtonView from '../view/show-more-button-view.js';
 import ExtraSectionView from '../view/extra-section-view.js';
 import PopupView from '../view/popup-view.js';
-import {render} from '../framework/render.js';
+import {render, remove} from '../framework/render.js';
 import {fixScrollbarOpen, fixScrollbarClose} from '../utils/common.js';
 
 const RenderCount = {
@@ -95,8 +95,7 @@ export default class MainPresenter {
 
     if (remainingFilmCardsCount <= RenderCount.FILM_CARDS) {
       renderCount = remainingFilmCardsCount;
-      this.#showMoreButton.element.remove();
-      this.#showMoreButton.removeElement();
+      remove(this.#showMoreButton);
     } else {
       renderCount = count;
     }
@@ -130,7 +129,7 @@ export default class MainPresenter {
   #onFilmCardClick = (evt) => {
     if (evt.target.closest('.film-card') && !evt.target.classList.contains('film-card__controls-item')) {
       const filmId = evt.target.closest('.film-card').getAttribute('data-id') - 1;
-      const popupComponent = new PopupView(this.#mainFilms[filmId], this.#comments);
+      const popupComponent = new PopupView(this.#mainFilms[filmId], this.#comments[filmId]);
       const body = document.querySelector('body');
 
       const renderPopup = () => {

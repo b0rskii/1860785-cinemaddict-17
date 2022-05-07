@@ -7,6 +7,7 @@ export const getRandomNoInteger = (min = 0, max = 1, decimalPlaces) => {
   const random = min + Math.random() * (max + 1 - min);
   return random.toFixed(decimalPlaces);
 };
+
 export const getConsecutiveNumbers = (length) => {
   const numbers = [];
 
