@@ -1,5 +1,7 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import {formatRuntime, formatDate} from '../utils/film.js';
+import {addClassByCondition} from '../utils/common.js';
+import {ActiveClass} from '../const.js';
 
 const Format = {
   RELEASE_DATE: 'DD MMMM YYYY',
@@ -53,6 +55,9 @@ export default class PopupView extends AbstractView {
   #description = null;
   #commentCount = null;
   #filmComments = null;
+  #isWatchlistFilm = null;
+  #isWatchedFilm = null;
+  #isFavoriteFilm = null;
 
   constructor (film, comments) {
     super();
@@ -72,6 +77,9 @@ export default class PopupView extends AbstractView {
     this.#description = film.filmInfo.description;
     this.#commentCount = film.commentsId.length;
     this.#filmComments = comments;
+    this.#isWatchlistFilm = film.userDetails.watchlist;
+    this.#isWatchedFilm = film.userDetails.alreadyWatched;
+    this.#isFavoriteFilm = film.userDetails.favorite;
   }
 
   get template() {
@@ -140,9 +148,9 @@ export default class PopupView extends AbstractView {
                   </div>
 
                   <section class="film-details__controls">
-                    <button type="button" class="film-details__control-button film-details__control-button--watchlist" id="watchlist" name="watchlist">Add to watchlist</button>
-                    <button type="button" class="film-details__control-button film-details__control-button--active film-details__control-button--watched" id="watched" name="watched">Already watched</button>
-                    <button type="button" class="film-details__control-button film-details__control-button--favorite" id="favorite" name="favorite">Add to favorites</button>
+                    <button type="button" class="film-details__control-button film-details__control-button--watchlist ${addClassByCondition(this.#isWatchlistFilm, ActiveClass.FILM_POPUP_CONTROL)}" id="watchlist" name="watchlist">Add to watchlist</button>
+                    <button type="button" class="film-details__control-button film-details__control-button--watched ${addClassByCondition(this.#isWatchedFilm, ActiveClass.FILM_POPUP_CONTROL)}" id="watched" name="watched">Already watched</button>
+                    <button type="button" class="film-details__control-button film-details__control-button--favorite ${addClassByCondition(this.#isFavoriteFilm, ActiveClass.FILM_POPUP_CONTROL)}" id="favorite" name="favorite">Add to favorites</button>
                   </section>
                 </div>
 

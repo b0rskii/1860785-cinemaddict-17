@@ -30,3 +30,9 @@ export const fixScrollbarClose = () => {
     document.documentElement.style.paddingRight = '';
   }
 };
+
+export const addClassByCondition = (condition, className) => {
+  if (condition) {
+    return className;
+  }
+};

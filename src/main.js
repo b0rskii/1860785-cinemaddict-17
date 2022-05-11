@@ -11,8 +11,8 @@ const footerStatistics = document.querySelector('.footer__statistics');
 
 const filmsModel = new FilmsModel();
 
-render(new UserView(), header);
+render(new UserView(filmsModel.alreadyWatchedFilms), header);
 
 new MainPresenter(main, filmsModel).init();
 
-render(new NumberOfFilmsView(), footerStatistics);
+render(new NumberOfFilmsView(filmsModel.films), footerStatistics);

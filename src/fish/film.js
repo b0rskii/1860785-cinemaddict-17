@@ -106,7 +106,9 @@ const generateEmoji = () => {
   return emojis[randomIndex];
 };
 
-const generateFilm = () => ({
+const generateBoolean = () => Boolean(getRandomInteger(0, 1));
+
+export const generateFilm = () => ({
   id: generateFilmsId(),
   commentsId: generateCommentsIdToFilm(),
   filmInfo: {
@@ -134,14 +136,14 @@ const generateFilm = () => ({
     description: generateDescription()
   },
   userDetails: {
-    watchlist: false,
-    alreadyWatched: true,
+    watchlist: generateBoolean(),
+    alreadyWatched: generateBoolean(),
     watchingDate: '2019-04-12T16:12:32.554Z',
-    favorite: false
+    favorite: generateBoolean()
   }
 });
 
-const generateComment = () => ({
+export const generateComment = () => ({
   id: generateCommentId(),
   author: 'Ilya O\'Reilly',
   comment: 'a film that changed my life, a true masterpiece, post-credit scene was just amazing omg.',
@@ -149,4 +151,4 @@ const generateComment = () => ({
   emotion: generateEmoji()
 });
 
-export {Amount, generateFilm, generateComment};
+export {Amount};
