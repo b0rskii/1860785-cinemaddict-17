@@ -1,11 +1,10 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
-export default class ExtraSectionView {
-  #element = null;
-
+export default class ExtraSectionView extends AbstractView {
   #title = null;
 
   constructor(title) {
+    super();
     this.#title = title;
   }
 
@@ -13,16 +12,5 @@ export default class ExtraSectionView {
     return `<section class="films-list films-list--extra">
               <h2 class="films-list__title">${this.#title}</h2>
             </section>`;
-  }
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
   }
 }

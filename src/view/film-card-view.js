@@ -1,12 +1,10 @@
-import {createElement} from '../render.js';
-import {formatDescription, formatRuntime, formatDate} from '../util.js';
+import AbstractView from '../framework/view/abstract-view.js';
+import {formatDescription, formatRuntime, formatDate} from '../utils/film.js';
 
 const DESCRIPTION_MAX_LENGTH = 140;
 const RELEASE_DATE_FORMAT = 'YYYY';
 
-export default class FilmCardView {
-  #element = null;
-
+export default class FilmCardView extends AbstractView{
   #filmId = null;
   #title = null;
   #totalRating = null;
@@ -18,6 +16,7 @@ export default class FilmCardView {
   #genre = null;
 
   constructor (film) {
+    super();
     this.#filmId = film.id;
     this.#title = film.filmInfo.title;
     this.#totalRating = film.filmInfo.totalRating;
@@ -51,14 +50,12 @@ export default class FilmCardView {
             </article>`;
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-    return this.#element;
-  }
+  setClickHandler = (callback) => {
+    this._callback.click = callback;
+    this.element.addEventListener('click', this.#clickHandler);
+  };
 
-  removeElement() {
-    this.#element = null;
-  }
+  #clickHandler = (evt) => {
+    this._callback.click(evt);
+  };
 }
