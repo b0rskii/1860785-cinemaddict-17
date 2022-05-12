@@ -1,5 +1,7 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import {formatDescription, formatRuntime, formatDate} from '../utils/film.js';
+import {addClassByCondition} from '../utils/common.js';
+import {ActiveClass} from '../const.js';
 
 const DESCRIPTION_MAX_LENGTH = 140;
 const RELEASE_DATE_FORMAT = 'YYYY';
@@ -14,6 +16,9 @@ export default class FilmCardView extends AbstractView{
   #releaseDate = null;
   #comments = null;
   #genre = null;
+  #isWatchlistFilm = null;
+  #isWatchedFilm = null;
+  #isFavoriteFilm = null;
 
   constructor (film) {
     super();
@@ -26,6 +31,9 @@ export default class FilmCardView extends AbstractView{
     this.#releaseDate = film.filmInfo.release.date;
     this.#comments = film.commentsId;
     this.#genre = film.filmInfo.genre;
+    this.#isWatchlistFilm = film.userDetails.watchlist;
+    this.#isWatchedFilm = film.userDetails.alreadyWatched;
+    this.#isFavoriteFilm = film.userDetails.favorite;
   }
 
   get template() {
@@ -43,9 +51,9 @@ export default class FilmCardView extends AbstractView{
                 <span class="film-card__comments">${this.#comments.length} comments</span>
               </a>
               <div class="film-card__controls">
-                <button class="film-card__controls-item film-card__controls-item--add-to-watchlist" type="button">Add to watchlist</button>
-                <button class="film-card__controls-item film-card__controls-item--mark-as-watched" type="button">Mark as watched</button>
-                <button class="film-card__controls-item film-card__controls-item--favorite" type="button">Mark as favorite</button>
+                <button class="film-card__controls-item film-card__controls-item--add-to-watchlist ${addClassByCondition(this.#isWatchlistFilm, ActiveClass.FILM_CARD_CONTROL)}" type="button">Add to watchlist</button>
+                <button class="film-card__controls-item film-card__controls-item--mark-as-watched ${addClassByCondition(this.#isWatchedFilm, ActiveClass.FILM_CARD_CONTROL)}" type="button">Mark as watched</button>
+                <button class="film-card__controls-item film-card__controls-item--favorite ${addClassByCondition(this.#isFavoriteFilm, ActiveClass.FILM_CARD_CONTROL)}" type="button">Mark as favorite</button>
               </div>
             </article>`;
   }

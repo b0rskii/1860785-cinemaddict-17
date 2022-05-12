@@ -10,6 +10,7 @@ import ExtraSectionView from '../view/extra-section-view.js';
 import PopupView from '../view/popup-view.js';
 import {render, remove} from '../framework/render.js';
 import {fixScrollbarOpen, fixScrollbarClose} from '../utils/common.js';
+import {FilterTitle, ActiveClass} from '../const.js';
 
 const RenderCount = {
   FILM_CARDS: 5,
@@ -26,9 +27,12 @@ export default class MainPresenter {
   #filmsModel = null;
 
   #mainFilms = [];
+  #watchlistFilms = [];
+  #alreadyWatchedFilms = [];
+  #favoriteFilms = [];
   #comments = [];
-  #mainFilmsTopRateSorted = [];
-  #mainFilmsMostCommentedSorted = [];
+  #mainFilmsRaitingSorted = [];
+  #mainFilmsCommentsCountSorted = [];
   #renderedFilmCardsCount = 0;
 
   #filmsSection = new FilmsSectionView();
@@ -49,10 +53,18 @@ export default class MainPresenter {
   init = () => {
     this.#mainFilms = [...this.#filmsModel.films];
     this.#comments = [...this.#filmsModel.comments];
-    this.#mainFilmsTopRateSorted = this.#mainFilms.slice().sort((a, b) => b.filmInfo.totalRating - a.filmInfo.totalRating);
-    this.#mainFilmsMostCommentedSorted = this.#mainFilms.slice().sort((a, b) => b.commentsId.length - a.commentsId.length);
+    this.#watchlistFilms = [...this.#filmsModel.watchlistFilms];
+    this.#alreadyWatchedFilms = [...this.#filmsModel.alreadyWatchedFilms];
+    this.#favoriteFilms = [...this.#filmsModel.favoriteFilms];
+    this.#mainFilmsRaitingSorted = [...this.#filmsModel.sortByRaiting()];
+    this.#mainFilmsCommentsCountSorted = [...this.#filmsModel.sortByCommentsCount()];
 
-    render(new NavigationView(), this.#container);
+    const navigation = new NavigationView(this.#watchlistFilms, this.#alreadyWatchedFilms, this.#favoriteFilms);
+
+    render(navigation, this.#container);
+
+    navigation.setClickHandler(this.#onFilterClick);
+
     render(new SortView(), this.#container);
     render(this.#filmsSection, this.#container);
 
@@ -62,14 +74,7 @@ export default class MainPresenter {
       render(this.#filmsListSection, this.#filmsSection.element);
       render(this.#filmsListContainer, this.#filmsListSection.element);
 
-      if (this.#mainFilms.length > RenderCount.FILM_CARDS) {
-        this.#renderPartFilmCards(RenderCount.FILM_CARDS);
-        render(this.#showMoreButton, this.#filmsListSection.element);
-
-        this.#showMoreButton.setClickHandler(() => this.#renderPartFilmCards(RenderCount.FILM_CARDS));
-      } else {
-        this.#renderPartFilmCards(this.#mainFilms.length);
-      }
+      this.#renderPartFilmCards(RenderCount.FILM_CARDS, this.#mainFilms);
 
       render(this.#firstExtraSection, this.#filmsSection.element);
       render(this.#secondExtraSection, this.#filmsSection.element);
@@ -77,8 +82,8 @@ export default class MainPresenter {
       render(this.#secondExtraFilmsContainer, this.#secondExtraSection.element);
 
       for (let i = 0; i < Math.min(RenderCount.FILM_CARDS_EXTRA, this.#mainFilms.length); i++) {
-        const firstExtrafilmCardComponent = new FilmCardView(this.#mainFilmsTopRateSorted[i]);
-        const secondExtraFilmCardComponent = new FilmCardView(this.#mainFilmsMostCommentedSorted[i]);
+        const firstExtrafilmCardComponent = new FilmCardView(this.#mainFilmsRaitingSorted[i]);
+        const secondExtraFilmCardComponent = new FilmCardView(this.#mainFilmsCommentsCountSorted[i]);
 
         render(firstExtrafilmCardComponent, this.#firstExtraFilmsContainer.element);
         render(secondExtraFilmCardComponent, this.#secondExtraFilmsContainer.element);
@@ -89,8 +94,8 @@ export default class MainPresenter {
     }
   };
 
-  #renderPartFilmCards = (count) => {
-    const remainingFilmCardsCount = (this.#mainFilms.length - this.#renderedFilmCardsCount);
+  #renderPartFilmCards = (count, data) => {
+    const remainingFilmCardsCount = (data.length - this.#renderedFilmCardsCount);
     let renderCount;
 
     if (remainingFilmCardsCount <= RenderCount.FILM_CARDS) {
@@ -101,7 +106,7 @@ export default class MainPresenter {
     }
 
     for (let i = this.#renderedFilmCardsCount; i < renderCount + this.#renderedFilmCardsCount; i++) {
-      const filmCardComponent = new FilmCardView(this.#mainFilms[i]);
+      const filmCardComponent = new FilmCardView(data[i]);
 
       render(filmCardComponent, this.#filmsListContainer.element);
 
@@ -109,6 +114,12 @@ export default class MainPresenter {
     }
 
     this.#renderedFilmCardsCount += renderCount;
+
+    if (data.length === remainingFilmCardsCount && data.length > count) {
+      render(this.#showMoreButton, this.#filmsListSection.element);
+
+      this.#showMoreButton.setClickHandler(() => this.#renderPartFilmCards(count, data));
+    }
   };
 
   #closePopup = (body) => {
@@ -148,6 +159,59 @@ export default class MainPresenter {
       } else {
         renderPopup();
       }
+    }
+  };
+
+  #onFilterClick = (evt) => {
+    const renderFilterFilms = (target) => {
+      document.querySelector('.films-list').querySelectorAll('.film-card').forEach((item) => item.remove());
+      remove(this.#showMoreButton);
+
+      this.#renderedFilmCardsCount = 0;
+
+      if (target.textContent.includes(FilterTitle.All)) {
+        this.#renderPartFilmCards(RenderCount.FILM_CARDS, this.#mainFilms);
+      }
+
+      if (target.textContent.includes(FilterTitle.WATCHLIST)) {
+        this.#renderPartFilmCards(RenderCount.FILM_CARDS, this.#watchlistFilms);
+      }
+
+      if (target.textContent.includes(FilterTitle.WATCHED)) {
+        this.#renderPartFilmCards(RenderCount.FILM_CARDS, this.#alreadyWatchedFilms);
+      }
+
+      if (target.textContent.includes(FilterTitle.FAVORITES)) {
+        this.#renderPartFilmCards(RenderCount.FILM_CARDS, this.#favoriteFilms);
+      }
+    };
+
+    if (evt.target.matches('a') && !evt.target.classList.contains(ActiveClass.NAVIGATION_ITEM)) {
+      const elements = evt.target.parentElement.children;
+
+      for (const element of elements) {
+        if (element.classList.contains(ActiveClass.NAVIGATION_ITEM)) {
+          element.classList.remove(ActiveClass.NAVIGATION_ITEM);
+          break;
+        }
+      }
+
+      evt.target.classList.add(ActiveClass.NAVIGATION_ITEM);
+      renderFilterFilms(evt.target);
+    }
+
+    if (evt.target.matches('span') && !evt.target.parentElement.classList.contains(ActiveClass.NAVIGATION_ITEM)) {
+      const elements = evt.target.parentElement.parentElement.children;
+
+      for (const element of elements) {
+        if (element.classList.contains(ActiveClass.NAVIGATION_ITEM)) {
+          element.classList.remove(ActiveClass.NAVIGATION_ITEM);
+          break;
+        }
+      }
+
+      evt.target.parentElement.classList.add(ActiveClass.NAVIGATION_ITEM);
+      renderFilterFilms(evt.target.parentElement);
     }
   };
 }

@@ -106,6 +106,8 @@ const generateEmoji = () => {
   return emojis[randomIndex];
 };
 
+const generateBoolean = () => Boolean(getRandomInteger(0, 1));
+
 const generateFilm = () => ({
   id: generateFilmsId(),
   commentsId: generateCommentsIdToFilm(),
@@ -134,10 +136,10 @@ const generateFilm = () => ({
     description: generateDescription()
   },
   userDetails: {
-    watchlist: false,
-    alreadyWatched: true,
+    watchlist: generateBoolean(),
+    alreadyWatched: generateBoolean(),
     watchingDate: '2019-04-12T16:12:32.554Z',
-    favorite: false
+    favorite: generateBoolean()
   }
 });
 

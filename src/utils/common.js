@@ -1,14 +1,14 @@
-export const getRandomInteger = (min = 0, max = 1) => {
+const getRandomInteger = (min = 0, max = 1) => {
   const random = min + Math.random() * (max + 1 - min);
   return Math.floor(random);
 };
 
-export const getRandomNoInteger = (min = 0, max = 1, decimalPlaces) => {
+const getRandomNoInteger = (min = 0, max = 1, decimalPlaces) => {
   const random = min + Math.random() * (max + 1 - min);
   return random.toFixed(decimalPlaces);
 };
 
-export const getConsecutiveNumbers = (length) => {
+const getConsecutiveNumbers = (length) => {
   const numbers = [];
 
   for (let i = 1; i <= length; i++) {
@@ -18,15 +18,23 @@ export const getConsecutiveNumbers = (length) => {
   return numbers;
 };
 
-export const fixScrollbarOpen = () => {
+const fixScrollbarOpen = () => {
   if (window.innerWidth !== document.documentElement.clientWidth) {
     const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
     document.documentElement.style.paddingRight = `${scrollbarWidth}px`;
   }
 };
 
-export const fixScrollbarClose = () => {
+const fixScrollbarClose = () => {
   if (document.documentElement.style.paddingRight !== '') {
     document.documentElement.style.paddingRight = '';
   }
 };
+
+const addClassByCondition = (condition, className) => {
+  if (condition) {
+    return className;
+  }
+};
+
+export {getRandomInteger, getRandomNoInteger, getConsecutiveNumbers, fixScrollbarOpen, fixScrollbarClose, addClassByCondition};
