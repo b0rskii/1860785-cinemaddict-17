@@ -108,7 +108,7 @@ const generateEmoji = () => {
 
 const generateBoolean = () => Boolean(getRandomInteger(0, 1));
 
-export const generateFilm = () => ({
+const generateFilm = () => ({
   id: generateFilmsId(),
   commentsId: generateCommentsIdToFilm(),
   filmInfo: {
@@ -143,7 +143,7 @@ export const generateFilm = () => ({
   }
 });
 
-export const generateComment = () => ({
+const generateComment = () => ({
   id: generateCommentId(),
   author: 'Ilya O\'Reilly',
   comment: 'a film that changed my life, a true masterpiece, post-credit scene was just amazing omg.',
@@ -151,4 +151,4 @@ export const generateComment = () => ({
   emotion: generateEmoji()
 });
 
-export {Amount};
+export {Amount, generateFilm, generateComment};
