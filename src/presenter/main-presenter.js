@@ -1,16 +1,15 @@
+import FilmPresenter from './film-presenter.js';
 import NavigationView from '../view/navigation-view.js';
 import SortView from '../view/sort-view.js';
 import FilmsSectionView from '../view/films-section-view.js';
 import NoFilmsView from '../view/no-films-view.js';
 import FilmsListSectionView from '../view/films-list-section-view.js';
 import FilmsListContainerView from '../view/films-list-container-view.js';
-import FilmCardView from '../view/film-card-view';
 import ShowMoreButtonView from '../view/show-more-button-view.js';
 import ExtraSectionView from '../view/extra-section-view.js';
-import PopupView from '../view/popup-view.js';
 import {render, remove} from '../framework/render.js';
-import {fixScrollbarOpen, fixScrollbarClose} from '../utils/common.js';
 import {FilterTitle, ActiveClass} from '../const.js';
+import {updateItem} from '../utils/common.js';
 
 const RenderCount = {
   FILM_CARDS: 5,
@@ -33,6 +32,7 @@ export default class MainPresenter {
   #comments = [];
   #mainFilmsRaitingSorted = [];
   #mainFilmsCommentsCountSorted = [];
+  #filmPresenter = new Map();
   #renderedFilmCardsCount = 0;
 
   #sortComponent = new SortView();
@@ -94,11 +94,23 @@ export default class MainPresenter {
     render(this.#noFilmsComponent, this.#filmsSectionComponent.element);
   };
 
-  #renderFilm = (filmData, container) => {
-    const filmCardComponent = new FilmCardView(filmData);
+  #handlePopupStatusChange = () => {
+    this.#filmPresenter.forEach((item) => item.resetPopupView());
+  };
 
-    render(filmCardComponent, container);
-    filmCardComponent.setClickHandler(this.#onFilmCardClick);
+  #handleFilmChange = (updatedFilm) => {
+    this.#mainFilms = updateItem(this.#mainFilms, updatedFilm);
+    this.#filmPresenter.get(updatedFilm.id).init(updatedFilm, this.#comments[updatedFilm.id - 1]);
+  };
+
+  #renderFilm = (filmData, container) => {
+    const filmPresenter = new FilmPresenter(container, this.#handleFilmChange, this.#handlePopupStatusChange);
+    const filmComments = this.#comments[filmData.id - 1];
+    filmPresenter.init(filmData, filmComments);
+
+    if (container === this.#filmsListContainerComponent.element) {
+      this.#filmPresenter.set(filmData.id, filmPresenter);
+    }
   };
 
   #renderPartFilmCards = (count, data) => {
@@ -140,52 +152,16 @@ export default class MainPresenter {
     render(this.#showMoreButtonComponent, container);
   };
 
-  #closePopup = (body) => {
-    fixScrollbarClose();
-    body.querySelector('.film-details').remove();
-    body.classList.remove('hide-overflow');
-    document.removeEventListener('keydown', this.#onPopupEscapeKeydown);
-  };
-
-  #onPopupEscapeKeydown = (evt) => {
-    if (evt.key === 'Escape' || evt.key === 'Esc') {
-      const body = document.querySelector('body');
-
-      this.#closePopup(body);
-    }
-  };
-
-  #onFilmCardClick = (evt) => {
-    if (evt.target.closest('.film-card') && !evt.target.classList.contains('film-card__controls-item')) {
-      const filmId = evt.target.closest('.film-card').getAttribute('data-id') - 1;
-      const popupComponent = new PopupView(this.#mainFilms[filmId], this.#comments[filmId]);
-      const body = document.querySelector('body');
-
-      const renderPopup = () => {
-        fixScrollbarOpen();
-        render(popupComponent, body);
-        body.classList.add('hide-overflow');
-
-        popupComponent.setClickHandler(() => this.#closePopup(body));
-
-        document.addEventListener('keydown', this.#onPopupEscapeKeydown);
-      };
-
-      if (body.lastElementChild.matches('section.film-details')) {
-        this.#closePopup(body);
-        renderPopup();
-      } else {
-        renderPopup();
-      }
-    }
+  #clearFilmsList = () => {
+    this.#filmPresenter.forEach((item) => item.destroy());
+    this.#filmPresenter.clear();
+    this.#renderedFilmCardsCount = 0;
+    remove(this.#showMoreButtonComponent);
   };
 
   #onFilterClick = (evt) => {
     const renderFilterFilms = (target) => {
-      document.querySelector('.films-list').querySelectorAll('.film-card').forEach((item) => item.remove());
-      remove(this.#showMoreButtonComponent);
-
-      this.#renderedFilmCardsCount = 0;
+      this.#clearFilmsList();
 
       if (target.textContent.includes(FilterTitle.All)) {
         this.#renderPartFilmCards(RenderCount.FILM_CARDS, this.#mainFilms);
