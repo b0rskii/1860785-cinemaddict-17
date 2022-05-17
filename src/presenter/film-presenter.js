@@ -4,9 +4,11 @@ import {fixScrollbarOpen, fixScrollbarClose} from '../utils/common.js';
 import {render, remove, replace} from '../framework/render.js';
 import {Filter} from '../const.js';
 
-const PopupStatus = {
-  CLOSED: 'CLOSED',
-  OPENED: 'OPENED'
+const Film = {
+  RENDERED: 'RENDERED',
+  NOT_RENDERED: 'NOT_RENDERED',
+  POPUP_CLOSED: 'POPUP_CLOSED',
+  POPUP_OPENED: 'POPUP_OPENED'
 };
 
 export default class FilmPresenter {
@@ -17,7 +19,8 @@ export default class FilmPresenter {
   #popupComponent = null;
   #popupContainer = null;
 
-  #popupStatus = PopupStatus.CLOSED;
+  #filmStatus = Film.NOT_RENDERED;
+  #popupStatus = Film.POPUP_CLOSED;
   #changeData = null;
   #changePopupStatusToClose = null;
   #changeFilter = null;
@@ -47,14 +50,15 @@ export default class FilmPresenter {
 
     if (prevFilmComponent === null) {
       render(this.#filmComponent, this.#container);
+      this.#filmStatus = Film.RENDERED;
       return;
     }
 
-    if (this.#container.contains(prevFilmComponent.element)) {
+    if (this.#filmStatus === Film.RENDERED) {
       replace(this.#filmComponent, prevFilmComponent);
     }
 
-    if (this.#popupStatus === PopupStatus.OPENED) {
+    if (this.#popupStatus === Film.POPUP_OPENED) {
       replace(this.#popupComponent, prevPopupComponent);
       this.#setPopupClickHandlers();
     }
@@ -69,7 +73,7 @@ export default class FilmPresenter {
   };
 
   removePopupView = () => {
-    if (this.#popupStatus === PopupStatus.OPENED) {
+    if (this.#popupStatus === Film.POPUP_OPENED) {
       remove(this.#popupComponent);
     }
   };
@@ -89,7 +93,7 @@ export default class FilmPresenter {
 
     this.#setPopupClickHandlers();
 
-    this.#popupStatus = PopupStatus.OPENED;
+    this.#popupStatus = Film.POPUP_OPENED;
 
     document.addEventListener('keydown', this.#onPopupEscapeKeydown);
   };
@@ -98,7 +102,7 @@ export default class FilmPresenter {
     fixScrollbarClose();
 
     this.#changePopupStatusToClose();
-    this.#popupStatus = PopupStatus.CLOSED;
+    this.#popupStatus = Film.POPUP_CLOSED;
 
     this.#popupComponent.bodyRemoveHideOverflow();
     document.removeEventListener('keydown', this.#onPopupEscapeKeydown);

@@ -33,7 +33,8 @@ export default class MainPresenter {
   #mainFilmsRaitingSorted = [];
   #mainFilmsCommentsCountSorted = [];
   #filmPresenter = new Map();
-  #filmPresenterExtra = new Map();
+  #filmPresenterFirstExtra = new Map();
+  #filmPresenterSecondExtra = new Map();
   #renderedFilmCardsCount = 0;
 
   #navigationComponent = null;
@@ -98,7 +99,8 @@ export default class MainPresenter {
 
   #handlePopupStatusChange = () => {
     this.#filmPresenter.forEach((item) => item.removePopupView());
-    this.#filmPresenterExtra.forEach((item) => item.removePopupView());
+    this.#filmPresenterFirstExtra.forEach((item) => item.removePopupView());
+    this.#filmPresenterSecondExtra.forEach((item) => item.removePopupView());
   };
 
   #handleFilmChange = (updatedFilm) => {
@@ -111,10 +113,17 @@ export default class MainPresenter {
       }
     }
 
-    const extraFilmsIndificators = this.#filmPresenterExtra.keys();
-    for (const extraFilmId of extraFilmsIndificators) {
+    const firstExtraFilmsIndificators = this.#filmPresenterFirstExtra.keys();
+    for (const extraFilmId of firstExtraFilmsIndificators) {
       if (extraFilmId === updatedFilm.id) {
-        this.#filmPresenterExtra.get(updatedFilm.id).init(updatedFilm, this.#comments[updatedFilm.id - 1]);
+        this.#filmPresenterFirstExtra.get(updatedFilm.id).init(updatedFilm, this.#comments[updatedFilm.id - 1]);
+      }
+    }
+
+    const secondExtraFilmsIndificators = this.#filmPresenterSecondExtra.keys();
+    for (const extraFilmId of secondExtraFilmsIndificators) {
+      if (extraFilmId === updatedFilm.id) {
+        this.#filmPresenterSecondExtra.get(updatedFilm.id).init(updatedFilm, this.#comments[updatedFilm.id - 1]);
       }
     }
   };
@@ -156,11 +165,22 @@ export default class MainPresenter {
     const filmComments = this.#comments[filmData.id - 1];
     filmPresenter.init(filmData, filmComments);
 
-    if (container === this.#filmsListContainerComponent.element) {
-      this.#filmPresenter.set(filmData.id, filmPresenter);
-    } else {
-      this.#filmPresenterExtra.set(filmData.id, filmPresenter);
+    switch (container) {
+      case this.#filmsListContainerComponent.element:
+        this.#filmPresenter.set(filmData.id, filmPresenter);
+        break;
+      case this.#firstExtraFilmsContainerComponent.element:
+        this.#filmPresenterFirstExtra.set(filmData.id, filmPresenter);
+        break;
+      case this.#secondExtraFilmsContainerComponent.element:
+        this.#filmPresenterSecondExtra.set(filmData.id, filmPresenter);
+        break;
     }
+    // if (container === this.#filmsListContainerComponent.element) {
+    //   this.#filmPresenter.set(filmData.id, filmPresenter);
+    // } else {
+    //   this.#filmPresenterFirstExtra.set(filmData.id, filmPresenter);
+    // }
   };
 
   #renderPartFilmCards = (count, data) => {
