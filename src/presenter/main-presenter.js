@@ -7,8 +7,8 @@ import FilmsListSectionView from '../view/films-list-section-view.js';
 import FilmsListContainerView from '../view/films-list-container-view.js';
 import ShowMoreButtonView from '../view/show-more-button-view.js';
 import ExtraSectionView from '../view/extra-section-view.js';
-import {render, remove} from '../framework/render.js';
-import {FilterTitle, ActiveClass} from '../const.js';
+import {render, remove, replace} from '../framework/render.js';
+import {FilterTitle, Filter, ActiveClass} from '../const.js';
 import {updateItem} from '../utils/common.js';
 
 const RenderCount = {
@@ -33,8 +33,10 @@ export default class MainPresenter {
   #mainFilmsRaitingSorted = [];
   #mainFilmsCommentsCountSorted = [];
   #filmPresenter = new Map();
+  #filmPresenterExtra = new Map();
   #renderedFilmCardsCount = 0;
 
+  #navigationComponent = null;
   #sortComponent = new SortView();
   #filmsSectionComponent = new FilmsSectionView();
   #noFilmsComponent = new NoFilmsView();
@@ -61,16 +63,16 @@ export default class MainPresenter {
     this.#mainFilmsRaitingSorted = [...this.#filmsModel.sortByRaiting()];
     this.#mainFilmsCommentsCountSorted = [...this.#filmsModel.sortByCommentsCount()];
 
+    this.#navigationComponent = new NavigationView(this.#watchlistFilms, this.#alreadyWatchedFilms, this.#favoriteFilms);
+
     this.#renderNavigation();
     this.#renderSort();
     this.#renderFilms();
   };
 
   #renderNavigation = () => {
-    const navigationComponent = new NavigationView(this.#watchlistFilms, this.#alreadyWatchedFilms, this.#favoriteFilms);
-
-    render(navigationComponent, this.#container);
-    navigationComponent.setClickHandler(this.#onFilterClick);
+    render(this.#navigationComponent, this.#container);
+    this.#navigationComponent.setClickHandler(this.#onFilterClick);
   };
 
   #renderSort = () => {
@@ -95,21 +97,69 @@ export default class MainPresenter {
   };
 
   #handlePopupStatusChange = () => {
-    this.#filmPresenter.forEach((item) => item.resetPopupView());
+    this.#filmPresenter.forEach((item) => item.removePopupView());
+    this.#filmPresenterExtra.forEach((item) => item.removePopupView());
   };
 
   #handleFilmChange = (updatedFilm) => {
     this.#mainFilms = updateItem(this.#mainFilms, updatedFilm);
-    this.#filmPresenter.get(updatedFilm.id).init(updatedFilm, this.#comments[updatedFilm.id - 1]);
+
+    const renderedFilmsIndificators = this.#filmPresenter.keys();
+    for (const renderedFilmId of renderedFilmsIndificators) {
+      if (renderedFilmId === updatedFilm.id) {
+        this.#filmPresenter.get(updatedFilm.id).init(updatedFilm, this.#comments[updatedFilm.id - 1]);
+      }
+    }
+
+    const extraFilmsIndificators = this.#filmPresenterExtra.keys();
+    for (const extraFilmId of extraFilmsIndificators) {
+      if (extraFilmId === updatedFilm.id) {
+        this.#filmPresenterExtra.get(updatedFilm.id).init(updatedFilm, this.#comments[updatedFilm.id - 1]);
+      }
+    }
+  };
+
+  #handleFilterChange = (film, filter) => {
+    switch (filter) {
+      case Filter.WATCHLIST:
+        if (film.userDetails.watchlist) {
+          this.#watchlistFilms.push(film);
+        } else {
+          this.#watchlistFilms = this.#watchlistFilms.filter((item) => item !== film);
+        }
+        break;
+      case Filter.WATCHED:
+        if (film.userDetails.alreadyWatched) {
+          this.#alreadyWatchedFilms.push(film);
+        } else {
+          this.#alreadyWatchedFilms = this.#alreadyWatchedFilms.filter((item) => item !== film);
+        }
+        break;
+      case Filter.FAVORITES:
+        if (film.userDetails.favorite) {
+          this.#favoriteFilms.push(film);
+        } else {
+          this.#favoriteFilms = this.#favoriteFilms.filter((item) => item !== film);
+        }
+        break;
+    }
+
+    const newNavigationComponent = new NavigationView(this.#watchlistFilms, this.#alreadyWatchedFilms, this.#favoriteFilms);
+
+    replace(newNavigationComponent, this.#navigationComponent);
+    this.#navigationComponent = newNavigationComponent;
+    this.#navigationComponent.setClickHandler(this.#onFilterClick);
   };
 
   #renderFilm = (filmData, container) => {
-    const filmPresenter = new FilmPresenter(container, this.#handleFilmChange, this.#handlePopupStatusChange);
+    const filmPresenter = new FilmPresenter(container, this.#handleFilmChange, this.#handlePopupStatusChange, this.#handleFilterChange);
     const filmComments = this.#comments[filmData.id - 1];
     filmPresenter.init(filmData, filmComments);
 
     if (container === this.#filmsListContainerComponent.element) {
       this.#filmPresenter.set(filmData.id, filmPresenter);
+    } else {
+      this.#filmPresenterExtra.set(filmData.id, filmPresenter);
     }
   };
 

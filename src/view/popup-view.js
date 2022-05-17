@@ -197,6 +197,20 @@ export default class PopupView extends AbstractView {
             </section>`;
   }
 
+  get container() {
+    return document.querySelector('body');
+  }
+
+  checkPopupPresence = () => document.querySelector('.film-details');
+
+  bodyAddHideOverflow = () => {
+    document.querySelector('body').classList.add('hide-overflow');
+  };
+
+  bodyRemoveHideOverflow = () => {
+    document.querySelector('body').classList.remove('hide-overflow');
+  };
+
   setClickHandler = (callback) => {
     this._callback.closeButtonClick = callback;
     this.element.querySelector('.film-details__close-btn').addEventListener('click', this.#closeButtonClickHandler);
@@ -221,18 +235,15 @@ export default class PopupView extends AbstractView {
     this._callback.closeButtonClick();
   };
 
-  #watchlistClickHandler = (evt) => {
-    evt.preventDefault();
+  #watchlistClickHandler = () => {
     this._callback.watchlistClick();
   };
 
-  #watchedClickHandler = (evt) => {
-    evt.preventDefault();
+  #watchedClickHandler = () => {
     this._callback.watchedClick();
   };
 
-  #favoriteClickHandler = (evt) => {
-    evt.preventDefault();
+  #favoriteClickHandler = () => {
     this._callback.favoriteClick();
   };
 }

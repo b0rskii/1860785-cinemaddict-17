@@ -79,7 +79,9 @@ export default class FilmCardView extends AbstractView{
   };
 
   #clickHandler = (evt) => {
-    this._callback.click(evt);
+    if (evt.target.closest('.film-card') && !evt.target.classList.contains('film-card__controls-item')) {
+      this._callback.click();
+    }
   };
 
   #watchlistClickHandler = () => {

@@ -35,6 +35,8 @@ const addClassByCondition = (condition, className) => {
   if (condition) {
     return className;
   }
+
+  return '';
 };
 
 const updateItem = (items, update) => {
