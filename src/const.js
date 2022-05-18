@@ -5,6 +5,12 @@ const FilterTitle = {
   FAVORITES: 'Favorites'
 };
 
+const Filter = {
+  WATCHLIST: 'WATCHLIST',
+  WATCHED: 'WATCHED',
+  FAVORITES: 'FAVORITES'
+};
+
 const ActiveClass = {
   FILM_CARD_CONTROL: 'film-card__controls-item--active',
   FILM_POPUP_CONTROL: 'film-details__control-button--active',
@@ -29,4 +35,4 @@ const UserRank = {
   }
 };
 
-export {FilterTitle, ActiveClass, UserRank};
+export {FilterTitle, Filter, ActiveClass, UserRank};
