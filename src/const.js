@@ -1,11 +1,5 @@
-const FilterTitle = {
-  All: 'All movies',
-  WATCHLIST: 'Watchlist',
-  WATCHED: 'History',
-  FAVORITES: 'Favorites'
-};
-
-const Filter = {
+const FilterType = {
+  ALL: 'ALL',
   WATCHLIST: 'WATCHLIST',
   WATCHED: 'WATCHED',
   FAVORITES: 'FAVORITES'
@@ -16,6 +10,12 @@ const ActiveClass = {
   FILM_POPUP_CONTROL: 'film-details__control-button--active',
   NAVIGATION_ITEM: 'main-navigation__item--active',
   SORT_ITEM: 'sort__button--active'
+};
+
+const SortType = {
+  DEFAULT: 'default',
+  BY_DATE: 'by-date',
+  BY_RAITING: 'by-raiting'
 };
 
 const UserRank = {
@@ -35,4 +35,4 @@ const UserRank = {
   }
 };
 
-export {FilterTitle, Filter, ActiveClass, UserRank};
+export {FilterType, ActiveClass, SortType, UserRank};
