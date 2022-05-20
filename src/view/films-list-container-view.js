@@ -4,4 +4,6 @@ export default class FilmsListContainerView extends AbstractView {
   get template() {
     return '<div class="films-list__container"></div>';
   }
+
+  checkOnFilmsListPresence = () => document.querySelector('.films-list').querySelector('.films-list__container');
 }

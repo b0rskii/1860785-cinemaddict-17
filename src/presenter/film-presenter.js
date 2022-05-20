@@ -2,7 +2,7 @@ import FilmCardView from '../view/film-card-view';
 import PopupView from '../view/popup-view.js';
 import {fixScrollbarOpen, fixScrollbarClose} from '../utils/common.js';
 import {render, remove, replace} from '../framework/render.js';
-import {Filter} from '../const.js';
+import {FilterType} from '../const.js';
 
 const Film = {
   RENDERED: 'RENDERED',
@@ -126,36 +126,36 @@ export default class FilmPresenter {
   #onWatchlistControlClick = () => {
     this.#film.userDetails.watchlist = !(this.#film.userDetails.watchlist);
     this.#changeData(this.#film);
-    this.#changeFilter(this.#film, Filter.WATCHLIST);
+    this.#changeFilter(this.#film, FilterType.WATCHLIST);
   };
 
   #onWatchedControlClick = () => {
     this.#film.userDetails.alreadyWatched = !(this.#film.userDetails.alreadyWatched);
     this.#changeData(this.#film);
-    this.#changeFilter(this.#film, Filter.WATCHED);
+    this.#changeFilter(this.#film, FilterType.WATCHED);
   };
 
   #onFavoriteControlClick = () => {
     this.#film.userDetails.favorite = !(this.#film.userDetails.favorite);
     this.#changeData(this.#film);
-    this.#changeFilter(this.#film, Filter.FAVORITES);
+    this.#changeFilter(this.#film, FilterType.FAVORITES);
   };
 
   #onPopupWatchlistControlClick = () => {
     this.#film.userDetails.watchlist = !(this.#film.userDetails.watchlist);
     this.#changeData(this.#film);
-    this.#changeFilter(this.#film, Filter.WATCHLIST);
+    this.#changeFilter(this.#film, FilterType.WATCHLIST);
   };
 
   #onPopupWatchedControlClick = () => {
     this.#film.userDetails.alreadyWatched = !(this.#film.userDetails.alreadyWatched);
     this.#changeData(this.#film);
-    this.#changeFilter(this.#film, Filter.WATCHED);
+    this.#changeFilter(this.#film, FilterType.WATCHED);
   };
 
   #onPopupFavoriteControlClick = () => {
     this.#film.userDetails.favorite = !(this.#film.userDetails.favorite);
     this.#changeData(this.#film);
-    this.#changeFilter(this.#film, Filter.FAVORITES);
+    this.#changeFilter(this.#film, FilterType.FAVORITES);
   };
 }

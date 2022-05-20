@@ -8,8 +8,10 @@ import FilmsListContainerView from '../view/films-list-container-view.js';
 import ShowMoreButtonView from '../view/show-more-button-view.js';
 import ExtraSectionView from '../view/extra-section-view.js';
 import {render, remove, replace} from '../framework/render.js';
-import {FilterTitle, Filter, ActiveClass} from '../const.js';
+import {FilterType, SortType} from '../const.js';
 import {updateItem} from '../utils/common.js';
+import {formatDateToUnix} from '../utils/film.js';
+import {RenderPosition} from '../framework/render.js';
 
 const RenderCount = {
   FILM_CARDS: 5,
@@ -35,12 +37,15 @@ export default class MainPresenter {
   #filmPresenter = new Map();
   #filmPresenterFirstExtra = new Map();
   #filmPresenterSecondExtra = new Map();
+  #currentSortType = SortType.DEFAULT;
+  #currentFilterType = FilterType.ALL;
+  #sourcedMainFilms = [];
   #renderedFilmCardsCount = 0;
 
   #navigationComponent = null;
   #sortComponent = new SortView();
   #filmsSectionComponent = new FilmsSectionView();
-  #noFilmsComponent = new NoFilmsView();
+  #noFilmsComponent = new NoFilmsView(this.#currentFilterType);
   #filmsListSectionComponent = new FilmsListSectionView();
   #filmsListContainerComponent = new FilmsListContainerView();
   #showMoreButtonComponent = new ShowMoreButtonView();
@@ -57,6 +62,7 @@ export default class MainPresenter {
 
   init = () => {
     this.#mainFilms = [...this.#filmsModel.films];
+    this.#sourcedMainFilms = [...this.#filmsModel.films];
     this.#comments = [...this.#filmsModel.comments];
     this.#watchlistFilms = [...this.#filmsModel.watchlistFilms];
     this.#alreadyWatchedFilms = [...this.#filmsModel.alreadyWatchedFilms];
@@ -64,20 +70,19 @@ export default class MainPresenter {
     this.#mainFilmsRaitingSorted = [...this.#filmsModel.sortByRaiting()];
     this.#mainFilmsCommentsCountSorted = [...this.#filmsModel.sortByCommentsCount()];
 
-    this.#navigationComponent = new NavigationView(this.#watchlistFilms, this.#alreadyWatchedFilms, this.#favoriteFilms);
-
     this.#renderNavigation();
-    this.#renderSort();
     this.#renderFilms();
   };
 
   #renderNavigation = () => {
+    this.#navigationComponent = new NavigationView(this.#watchlistFilms, this.#alreadyWatchedFilms, this.#favoriteFilms, this.#currentFilterType);
     render(this.#navigationComponent, this.#container);
     this.#navigationComponent.setClickHandler(this.#onFilterClick);
   };
 
   #renderSort = () => {
-    render(this.#sortComponent, this.#container);
+    render(this.#sortComponent, this.#navigationComponent.element, RenderPosition.AFTEREND);
+    this.#sortComponent.setClickHandler(this.#onSortClick);
   };
 
   #renderFilms = () => {
@@ -86,6 +91,7 @@ export default class MainPresenter {
     if (this.#mainFilms.length === 0) {
       this.#renderNoFilms();
     } else {
+      this.#renderSort();
       render(this.#filmsListSectionComponent, this.#filmsSectionComponent.element);
       render(this.#filmsListContainerComponent, this.#filmsListSectionComponent.element);
       this.#renderPartFilmCards(RenderCount.FILM_CARDS, this.#mainFilms);
@@ -105,6 +111,7 @@ export default class MainPresenter {
 
   #handleFilmChange = (updatedFilm) => {
     this.#mainFilms = updateItem(this.#mainFilms, updatedFilm);
+    this.#sourcedMainFilms = updateItem(this.#sourcedMainFilms, updatedFilm);
 
     const renderedFilmsIndificators = this.#filmPresenter.keys();
     for (const renderedFilmId of renderedFilmsIndificators) {
@@ -128,32 +135,54 @@ export default class MainPresenter {
     }
   };
 
+  #updateFilmsListIfFilterActive = (filterType, filterData) => {
+    if (this.#currentFilterType === filterType) {
+      const renderedFilmsCount = this.#filmPresenter.size;
+
+      if (filterData.length === this.#filmPresenter.size - 1) {
+        this.#clearFilmsList();
+        this.#renderFilteredFilms(filterData, renderedFilmsCount - 1);
+      } else {
+        this.#clearFilmsList();
+        this.#renderFilteredFilms(filterData, renderedFilmsCount);
+      }
+    }
+  };
+
   #handleFilterChange = (film, filter) => {
     switch (filter) {
-      case Filter.WATCHLIST:
+      case FilterType.WATCHLIST:
         if (film.userDetails.watchlist) {
           this.#watchlistFilms.push(film);
+          this.#updateFilmsListIfFilterActive(FilterType.WATCHLIST, this.#watchlistFilms);
         } else {
           this.#watchlistFilms = this.#watchlistFilms.filter((item) => item !== film);
+          this.#updateFilmsListIfFilterActive(FilterType.WATCHLIST, this.#watchlistFilms);
         }
         break;
-      case Filter.WATCHED:
+
+      case FilterType.WATCHED:
         if (film.userDetails.alreadyWatched) {
           this.#alreadyWatchedFilms.push(film);
+          this.#updateFilmsListIfFilterActive(FilterType.WATCHED, this.#alreadyWatchedFilms);
         } else {
           this.#alreadyWatchedFilms = this.#alreadyWatchedFilms.filter((item) => item !== film);
+          this.#updateFilmsListIfFilterActive(FilterType.WATCHED, this.#alreadyWatchedFilms);
         }
         break;
-      case Filter.FAVORITES:
+
+      case FilterType.FAVORITES:
         if (film.userDetails.favorite) {
           this.#favoriteFilms.push(film);
+          this.#updateFilmsListIfFilterActive(FilterType.FAVORITES, this.#favoriteFilms);
         } else {
           this.#favoriteFilms = this.#favoriteFilms.filter((item) => item !== film);
+          this.#updateFilmsListIfFilterActive(FilterType.FAVORITES, this.#favoriteFilms);
         }
         break;
     }
 
-    const newNavigationComponent = new NavigationView(this.#watchlistFilms, this.#alreadyWatchedFilms, this.#favoriteFilms);
+    const newNavigationComponent = new NavigationView(this.#watchlistFilms, this.#alreadyWatchedFilms, this.#favoriteFilms, this.#currentFilterType);
 
     replace(newNavigationComponent, this.#navigationComponent);
     this.#navigationComponent = newNavigationComponent;
@@ -176,11 +205,6 @@ export default class MainPresenter {
         this.#filmPresenterSecondExtra.set(filmData.id, filmPresenter);
         break;
     }
-    // if (container === this.#filmsListContainerComponent.element) {
-    //   this.#filmPresenter.set(filmData.id, filmPresenter);
-    // } else {
-    //   this.#filmPresenterFirstExtra.set(filmData.id, filmPresenter);
-    // }
   };
 
   #renderPartFilmCards = (count, data) => {
@@ -229,53 +253,120 @@ export default class MainPresenter {
     remove(this.#showMoreButtonComponent);
   };
 
-  #onFilterClick = (evt) => {
-    const renderFilterFilms = (target) => {
-      this.#clearFilmsList();
+  #renderFilteredFilms = (filteredData, renderCount = RenderCount.FILM_CARDS) => {
+    if (filteredData.length === 0 && this.#filmsListContainerComponent.checkOnFilmsListPresence()) {
+      this.#noFilmsComponent = new NoFilmsView(this.#currentFilterType);
 
-      if (target.textContent.includes(FilterTitle.All)) {
-        this.#renderPartFilmCards(RenderCount.FILM_CARDS, this.#mainFilms);
-      }
+      remove(this.#filmsListContainerComponent);
+      replace(this.#noFilmsComponent, this.#filmsListSectionComponent);
+      remove(this.#sortComponent);
 
-      if (target.textContent.includes(FilterTitle.WATCHLIST)) {
-        this.#renderPartFilmCards(RenderCount.FILM_CARDS, this.#watchlistFilms);
-      }
-
-      if (target.textContent.includes(FilterTitle.WATCHED)) {
-        this.#renderPartFilmCards(RenderCount.FILM_CARDS, this.#alreadyWatchedFilms);
-      }
-
-      if (target.textContent.includes(FilterTitle.FAVORITES)) {
-        this.#renderPartFilmCards(RenderCount.FILM_CARDS, this.#favoriteFilms);
-      }
-    };
-
-    if (evt.target.matches('a') && !evt.target.classList.contains(ActiveClass.NAVIGATION_ITEM)) {
-      const elements = evt.target.parentElement.children;
-
-      for (const element of elements) {
-        if (element.classList.contains(ActiveClass.NAVIGATION_ITEM)) {
-          element.classList.remove(ActiveClass.NAVIGATION_ITEM);
-          break;
-        }
-      }
-
-      evt.target.classList.add(ActiveClass.NAVIGATION_ITEM);
-      renderFilterFilms(evt.target);
+      return;
     }
 
-    if (evt.target.matches('span') && !evt.target.parentElement.classList.contains(ActiveClass.NAVIGATION_ITEM)) {
-      const elements = evt.target.parentElement.parentElement.children;
+    if (filteredData.length === 0 && this.#noFilmsComponent.element) {
+      const newNoFilmsComponent = new NoFilmsView(this.#currentFilterType);
 
-      for (const element of elements) {
-        if (element.classList.contains(ActiveClass.NAVIGATION_ITEM)) {
-          element.classList.remove(ActiveClass.NAVIGATION_ITEM);
-          break;
+      replace(newNoFilmsComponent, this.#noFilmsComponent);
+      remove(this.#sortComponent);
+      this.#noFilmsComponent = newNoFilmsComponent;
+
+      return;
+    }
+
+    if (filteredData.length !== 0 && !this.#filmsListContainerComponent.checkOnFilmsListPresence()) {
+      replace(this.#filmsListSectionComponent, this.#noFilmsComponent);
+      render(this.#filmsListContainerComponent, this.#filmsListSectionComponent.element);
+      this.#renderSort(this.#navigationComponent.element, RenderPosition.AFTEREND);
+
+    }
+
+    this.#mainFilms = [...filteredData];
+    this.#renderPartFilmCards(renderCount, this.#mainFilms);
+
+    // switch (this.#currentSortType) {
+    //   case SortType.BY_DATE:
+    //     this.#mainFilms = [...filteredData].sort((a, b) => formatDateToUnix(b.filmInfo.release.date) - formatDateToUnix(a.filmInfo.release.date));
+    //     this.#renderPartFilmCards(renderCount, this.#mainFilms);
+    //     break;
+    //   case SortType.BY_RAITING:
+    //     this.#mainFilms = [...filteredData].sort((a, b) => b.filmInfo.totalRating - a.filmInfo.totalRating);
+    //     this.#renderPartFilmCards(renderCount, this.#mainFilms);
+    //     break;
+    //   default:
+    //     this.#mainFilms = [...filteredData];
+    //     this.#renderPartFilmCards(renderCount, this.#mainFilms);
+    // }
+  };
+
+  #onFilterClick = (filterType) => {
+    if (this.#currentFilterType === filterType) {
+      return;
+    }
+
+    this.#currentFilterType = filterType;
+    this.#navigationComponent.changeActiveElement(filterType);
+
+    this.#clearFilmsList();
+
+    switch (filterType) {
+      case FilterType.WATCHLIST:
+        this.#renderFilteredFilms(this.#watchlistFilms);
+        break;
+
+      case FilterType.WATCHED:
+        this.#renderFilteredFilms(this.#alreadyWatchedFilms);
+        break;
+
+      case FilterType.FAVORITES:
+        this.#renderFilteredFilms(this.#favoriteFilms);
+        break;
+
+      default:
+        this.#renderFilteredFilms(this.#sourcedMainFilms);
+    }
+
+    this.#currentSortType = SortType.DEFAULT;
+    this.#sortComponent.changeActiveElement(SortType.DEFAULT);
+  };
+
+  #onSortClick = (sortType) => {
+    if (this.#currentSortType === sortType) {
+      return;
+    }
+
+    this.#currentSortType = sortType;
+    this.#sortComponent.changeActiveElement(this.#currentSortType);
+
+    this.#clearFilmsList();
+
+    switch (sortType) {
+      case SortType.BY_DATE:
+        this.#mainFilms.sort((a, b) => formatDateToUnix(b.filmInfo.release.date) - formatDateToUnix(a.filmInfo.release.date));
+        this.#renderPartFilmCards(RenderCount.FILM_CARDS, this.#mainFilms);
+        break;
+
+      case SortType.BY_RAITING:
+        this.#mainFilms.sort((a, b) => b.filmInfo.totalRating - a.filmInfo.totalRating);
+        this.#renderPartFilmCards(RenderCount.FILM_CARDS, this.#mainFilms);
+        break;
+
+      default:
+        switch (this.#currentFilterType) {
+          case FilterType.WATCHLIST:
+            this.#mainFilms = this.#sourcedMainFilms.filter((item) => item.userDetails.watchlist === true);
+            break;
+          case FilterType.WATCHED:
+            this.#mainFilms = this.#sourcedMainFilms.filter((item) => item.userDetails.alreadyWatched === true);
+            break;
+          case FilterType.FAVORITES:
+            this.#mainFilms = this.#sourcedMainFilms.filter((item) => item.userDetails.favorite === true);
+            break;
+          default:
+            this.#mainFilms = [...this.#sourcedMainFilms];
         }
-      }
 
-      evt.target.parentElement.classList.add(ActiveClass.NAVIGATION_ITEM);
-      renderFilterFilms(evt.target.parentElement);
+        this.#renderPartFilmCards(RenderCount.FILM_CARDS, this.#mainFilms);
     }
   };
 }

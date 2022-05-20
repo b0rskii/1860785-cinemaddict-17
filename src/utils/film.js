@@ -16,4 +16,6 @@ const formatRuntime = (minutes) => {
 
 const formatDate = (date, format) => dayjs(date).format(format);
 
-export {formatDescription, formatRuntime, formatDate};
+const formatDateToUnix = (date) => dayjs(date).unix();
+
+export {formatDescription, formatRuntime, formatDate, formatDateToUnix};

@@ -1,4 +1,5 @@
 import {getRandomInteger, getRandomNoInteger, getConsecutiveNumbers} from '../utils/common.js';
+import dayjs from 'dayjs';
 
 const Amount = {
   FILMS: 22,
@@ -108,6 +109,13 @@ const generateEmoji = () => {
 
 const generateBoolean = () => Boolean(getRandomInteger(0, 1));
 
+const generateDate = () => {
+  const maxYearsGap = -20;
+  const yearsGap = getRandomInteger(maxYearsGap, 0);
+
+  return dayjs().add(yearsGap, 'year').toDate();
+};
+
 const generateFilm = () => ({
   id: generateFilmsId(),
   commentsId: generateCommentsIdToFilm(),
@@ -128,7 +136,7 @@ const generateFilm = () => ({
       'Jackie Chan'
     ],
     release: {
-      date: '2019-05-11T00:00:00.000Z',
+      date: generateDate(),
       releaseCountry: 'Finland'
     },
     runtime: generateRuntime(),
