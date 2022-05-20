@@ -69,14 +69,13 @@ export default class MainPresenter {
     this.#mainFilmsRaitingSorted = [...this.#filmsModel.sortByRaiting()];
     this.#mainFilmsCommentsCountSorted = [...this.#filmsModel.sortByCommentsCount()];
 
-    this.#navigationComponent = new NavigationView(this.#watchlistFilms, this.#alreadyWatchedFilms, this.#favoriteFilms);
-
     this.#renderNavigation();
     this.#renderSort();
     this.#renderFilms();
   };
 
   #renderNavigation = () => {
+    this.#navigationComponent = new NavigationView(this.#watchlistFilms, this.#alreadyWatchedFilms, this.#favoriteFilms, this.#currentFilterType);
     render(this.#navigationComponent, this.#container);
     this.#navigationComponent.setClickHandler(this.#onFilterClick);
   };
@@ -179,7 +178,7 @@ export default class MainPresenter {
         break;
     }
 
-    const newNavigationComponent = new NavigationView(this.#watchlistFilms, this.#alreadyWatchedFilms, this.#favoriteFilms);
+    const newNavigationComponent = new NavigationView(this.#watchlistFilms, this.#alreadyWatchedFilms, this.#favoriteFilms, this.#currentFilterType);
 
     replace(newNavigationComponent, this.#navigationComponent);
     this.#navigationComponent = newNavigationComponent;
