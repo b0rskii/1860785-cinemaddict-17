@@ -141,10 +141,10 @@ export default class MainPresenter {
 
       if (filterData.length === this.#filmPresenter.size - 1) {
         this.#clearFilmsList();
-        this.#renderFilteredFilms(filterData, renderedFilmsCount - 1);
+        this.#renderFilteredFilmsConsideringSorting(filterData, renderedFilmsCount - 1);
       } else {
         this.#clearFilmsList();
-        this.#renderFilteredFilms(filterData, renderedFilmsCount);
+        this.#renderFilteredFilmsConsideringSorting(filterData, renderedFilmsCount);
       }
     }
   };
@@ -253,8 +253,8 @@ export default class MainPresenter {
     remove(this.#showMoreButtonComponent);
   };
 
-  #renderFilteredFilms = (filteredData, renderCount = RenderCount.FILM_CARDS) => {
-    if (filteredData.length === 0 && this.#filmsListContainerComponent.checkOnFilmsListPresence()) {
+  #renderComponentsDependingOnFilmsPresence = (films) => {
+    if (films.length === 0 && this.#filmsListContainerComponent.checkOnFilmsListPresence()) {
       this.#noFilmsComponent = new NoFilmsView(this.#currentFilterType);
 
       remove(this.#filmsListContainerComponent);
@@ -264,7 +264,7 @@ export default class MainPresenter {
       return;
     }
 
-    if (filteredData.length === 0 && this.#noFilmsComponent.element) {
+    if (films.length === 0 && this.#noFilmsComponent.element) {
       const newNoFilmsComponent = new NoFilmsView(this.#currentFilterType);
 
       replace(newNoFilmsComponent, this.#noFilmsComponent);
@@ -274,29 +274,37 @@ export default class MainPresenter {
       return;
     }
 
-    if (filteredData.length !== 0 && !this.#filmsListContainerComponent.checkOnFilmsListPresence()) {
+    if (films.length !== 0 && !this.#filmsListContainerComponent.checkOnFilmsListPresence()) {
       replace(this.#filmsListSectionComponent, this.#noFilmsComponent);
       render(this.#filmsListContainerComponent, this.#filmsListSectionComponent.element);
       this.#renderSort(this.#navigationComponent.element, RenderPosition.AFTEREND);
 
     }
+  };
+
+  #renderFilteredFilms = (filteredData, renderCount = RenderCount.FILM_CARDS) => {
+    this.#renderComponentsDependingOnFilmsPresence(filteredData);
 
     this.#mainFilms = [...filteredData];
     this.#renderPartFilmCards(renderCount, this.#mainFilms);
+  };
 
-    // switch (this.#currentSortType) {
-    //   case SortType.BY_DATE:
-    //     this.#mainFilms = [...filteredData].sort((a, b) => formatDateToUnix(b.filmInfo.release.date) - formatDateToUnix(a.filmInfo.release.date));
-    //     this.#renderPartFilmCards(renderCount, this.#mainFilms);
-    //     break;
-    //   case SortType.BY_RAITING:
-    //     this.#mainFilms = [...filteredData].sort((a, b) => b.filmInfo.totalRating - a.filmInfo.totalRating);
-    //     this.#renderPartFilmCards(renderCount, this.#mainFilms);
-    //     break;
-    //   default:
-    //     this.#mainFilms = [...filteredData];
-    //     this.#renderPartFilmCards(renderCount, this.#mainFilms);
-    // }
+  #renderFilteredFilmsConsideringSorting = (filteredData, renderCount = RenderCount.FILM_CARDS) => {
+    this.#renderComponentsDependingOnFilmsPresence(filteredData);
+
+    switch (this.#currentSortType) {
+      case SortType.BY_DATE:
+        this.#mainFilms = [...filteredData].sort((a, b) => formatDateToUnix(b.filmInfo.release.date) - formatDateToUnix(a.filmInfo.release.date));
+        this.#renderPartFilmCards(renderCount, this.#mainFilms);
+        break;
+      case SortType.BY_RAITING:
+        this.#mainFilms = [...filteredData].sort((a, b) => b.filmInfo.totalRating - a.filmInfo.totalRating);
+        this.#renderPartFilmCards(renderCount, this.#mainFilms);
+        break;
+      default:
+        this.#mainFilms = [...filteredData];
+        this.#renderPartFilmCards(renderCount, this.#mainFilms);
+    }
   };
 
   #onFilterClick = (filterType) => {
