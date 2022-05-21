@@ -137,9 +137,9 @@ export default class MainPresenter {
 
   #updateFilmsListIfFilterActive = (filterType, filterData) => {
     if (this.#currentFilterType === filterType) {
-      const renderedFilmsCount = this.#filmPresenter.size;
+      const renderedFilmsCount = this.#renderedFilmCardsCount;
 
-      if (filterData.length === this.#filmPresenter.size - 1) {
+      if (filterData.length === renderedFilmsCount - 1) {
         this.#clearFilmsList();
         this.#renderFilteredFilmsConsideringSorting(filterData, renderedFilmsCount - 1);
       } else {
@@ -224,7 +224,7 @@ export default class MainPresenter {
 
     this.#renderedFilmCardsCount += renderCount;
 
-    if (data.length === remainingFilmCardsCount && data.length > count) {
+    if (data.length === remainingFilmCardsCount && data.length > count && count >= RenderCount.FILM_CARDS) {
       this.#renderShowMoreButton(this.#filmsListSectionComponent.element);
       this.#showMoreButtonComponent.setClickHandler(() => this.#renderPartFilmCards(count, data));
     }
