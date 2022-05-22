@@ -201,7 +201,7 @@ export default class PopupView extends AbstractView {
     return document.querySelector('body');
   }
 
-  checkPopupPresence = () => document.querySelector('.film-details');
+  checkPresence = () => document.querySelector('.film-details');
 
   bodyAddHideOverflow = () => {
     document.querySelector('body').classList.add('hide-overflow');

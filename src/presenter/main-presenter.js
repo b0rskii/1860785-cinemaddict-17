@@ -58,6 +58,7 @@ export default class MainPresenter {
     this.#container = container;
     this.#filmsModel = filmsModel;
     this.#renderedFilmCardsCount = 0;
+    this.popupPresenter = new Map();
   }
 
   init = () => {
@@ -103,36 +104,27 @@ export default class MainPresenter {
     render(this.#noFilmsComponent, this.#filmsSectionComponent.element);
   };
 
-  #handlePopupStatusChange = () => {
-    this.#filmPresenter.forEach((item) => item.removePopupView());
-    this.#filmPresenterFirstExtra.forEach((item) => item.removePopupView());
-    this.#filmPresenterSecondExtra.forEach((item) => item.removePopupView());
+  #changeFilm = (newFilm, filmPresenter, popupPresenter) => {
+    const renderedFilmsIndificators = filmPresenter.keys();
+
+    for (const renderedFilmId of renderedFilmsIndificators) {
+      if (renderedFilmId === newFilm.id) {
+        filmPresenter.get(newFilm.id).init(newFilm, this.#comments[newFilm.id - 1]);
+      }
+    }
+
+    if (popupPresenter.get(newFilm.id)) {
+      popupPresenter.get(newFilm.id).init(newFilm, this.#comments[newFilm.id - 1]);
+    }
   };
 
   #handleFilmChange = (updatedFilm) => {
     this.#mainFilms = updateItem(this.#mainFilms, updatedFilm);
     this.#sourcedMainFilms = updateItem(this.#sourcedMainFilms, updatedFilm);
 
-    const renderedFilmsIndificators = this.#filmPresenter.keys();
-    for (const renderedFilmId of renderedFilmsIndificators) {
-      if (renderedFilmId === updatedFilm.id) {
-        this.#filmPresenter.get(updatedFilm.id).init(updatedFilm, this.#comments[updatedFilm.id - 1]);
-      }
-    }
-
-    const firstExtraFilmsIndificators = this.#filmPresenterFirstExtra.keys();
-    for (const extraFilmId of firstExtraFilmsIndificators) {
-      if (extraFilmId === updatedFilm.id) {
-        this.#filmPresenterFirstExtra.get(updatedFilm.id).init(updatedFilm, this.#comments[updatedFilm.id - 1]);
-      }
-    }
-
-    const secondExtraFilmsIndificators = this.#filmPresenterSecondExtra.keys();
-    for (const extraFilmId of secondExtraFilmsIndificators) {
-      if (extraFilmId === updatedFilm.id) {
-        this.#filmPresenterSecondExtra.get(updatedFilm.id).init(updatedFilm, this.#comments[updatedFilm.id - 1]);
-      }
-    }
+    this.#changeFilm(updatedFilm, this.#filmPresenter, this.popupPresenter);
+    this.#changeFilm(updatedFilm, this.#filmPresenterFirstExtra, this.popupPresenter);
+    this.#changeFilm(updatedFilm, this.#filmPresenterSecondExtra, this.popupPresenter);
   };
 
   #updateFilmsListIfFilterActive = (filterType, filterData) => {
@@ -153,7 +145,7 @@ export default class MainPresenter {
     switch (filter) {
       case FilterType.WATCHLIST:
         if (film.userDetails.watchlist) {
-          this.#watchlistFilms.push(film);
+          this.#watchlistFilms = this.#sourcedMainFilms.filter((item) => item.userDetails.watchlist === true);
           this.#updateFilmsListIfFilterActive(FilterType.WATCHLIST, this.#watchlistFilms);
         } else {
           this.#watchlistFilms = this.#watchlistFilms.filter((item) => item !== film);
@@ -163,7 +155,7 @@ export default class MainPresenter {
 
       case FilterType.WATCHED:
         if (film.userDetails.alreadyWatched) {
-          this.#alreadyWatchedFilms.push(film);
+          this.#alreadyWatchedFilms = this.#sourcedMainFilms.filter((item) => item.userDetails.alreadyWatched === true);
           this.#updateFilmsListIfFilterActive(FilterType.WATCHED, this.#alreadyWatchedFilms);
         } else {
           this.#alreadyWatchedFilms = this.#alreadyWatchedFilms.filter((item) => item !== film);
@@ -173,7 +165,7 @@ export default class MainPresenter {
 
       case FilterType.FAVORITES:
         if (film.userDetails.favorite) {
-          this.#favoriteFilms.push(film);
+          this.#favoriteFilms = this.#sourcedMainFilms.filter((item) => item.userDetails.favorite === true);
           this.#updateFilmsListIfFilterActive(FilterType.FAVORITES, this.#favoriteFilms);
         } else {
           this.#favoriteFilms = this.#favoriteFilms.filter((item) => item !== film);
@@ -190,8 +182,9 @@ export default class MainPresenter {
   };
 
   #renderFilm = (filmData, container) => {
-    const filmPresenter = new FilmPresenter(container, this.#handleFilmChange, this.#handlePopupStatusChange, this.#handleFilterChange);
+    const filmPresenter = new FilmPresenter(container, this.#handleFilmChange, this.#handleFilterChange, this.popupPresenter);
     const filmComments = this.#comments[filmData.id - 1];
+
     filmPresenter.init(filmData, filmComments);
 
     switch (container) {
