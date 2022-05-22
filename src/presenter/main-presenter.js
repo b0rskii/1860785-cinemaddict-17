@@ -59,6 +59,7 @@ export default class MainPresenter {
     this.#filmsModel = filmsModel;
     this.#renderedFilmCardsCount = 0;
     this.popupPresenter = new Map();
+    this.popupComponent = new Map();
   }
 
   init = () => {
@@ -76,7 +77,12 @@ export default class MainPresenter {
   };
 
   #renderNavigation = () => {
-    this.#navigationComponent = new NavigationView(this.#watchlistFilms, this.#alreadyWatchedFilms, this.#favoriteFilms, this.#currentFilterType);
+    this.#navigationComponent = new NavigationView(
+      this.#watchlistFilms,
+      this.#alreadyWatchedFilms,
+      this.#favoriteFilms,
+      this.#currentFilterType
+    );
     render(this.#navigationComponent, this.#container);
     this.#navigationComponent.setClickHandler(this.#onFilterClick);
   };
@@ -104,7 +110,7 @@ export default class MainPresenter {
     render(this.#noFilmsComponent, this.#filmsSectionComponent.element);
   };
 
-  #changeFilm = (newFilm, filmPresenter, popupPresenter) => {
+  #changeFilm = (newFilm, filmPresenter) => {
     const renderedFilmsIndificators = filmPresenter.keys();
 
     for (const renderedFilmId of renderedFilmsIndificators) {
@@ -112,19 +118,19 @@ export default class MainPresenter {
         filmPresenter.get(newFilm.id).init(newFilm, this.#comments[newFilm.id - 1]);
       }
     }
-
-    if (popupPresenter.get(newFilm.id)) {
-      popupPresenter.get(newFilm.id).init(newFilm, this.#comments[newFilm.id - 1]);
-    }
   };
 
   #handleFilmChange = (updatedFilm) => {
     this.#mainFilms = updateItem(this.#mainFilms, updatedFilm);
     this.#sourcedMainFilms = updateItem(this.#sourcedMainFilms, updatedFilm);
 
-    this.#changeFilm(updatedFilm, this.#filmPresenter, this.popupPresenter);
-    this.#changeFilm(updatedFilm, this.#filmPresenterFirstExtra, this.popupPresenter);
-    this.#changeFilm(updatedFilm, this.#filmPresenterSecondExtra, this.popupPresenter);
+    this.#changeFilm(updatedFilm, this.#filmPresenter);
+    this.#changeFilm(updatedFilm, this.#filmPresenterFirstExtra);
+    this.#changeFilm(updatedFilm, this.#filmPresenterSecondExtra);
+
+    if (this.popupPresenter.get(updatedFilm.id)) {
+      this.popupPresenter.get(updatedFilm.id).init(updatedFilm, this.#comments[updatedFilm.id - 1]);
+    }
   };
 
   #updateFilmsListIfFilterActive = (filterType, filterData) => {
@@ -174,7 +180,12 @@ export default class MainPresenter {
         break;
     }
 
-    const newNavigationComponent = new NavigationView(this.#watchlistFilms, this.#alreadyWatchedFilms, this.#favoriteFilms, this.#currentFilterType);
+    const newNavigationComponent = new NavigationView(
+      this.#watchlistFilms,
+      this.#alreadyWatchedFilms,
+      this.#favoriteFilms,
+      this.#currentFilterType
+    );
 
     replace(newNavigationComponent, this.#navigationComponent);
     this.#navigationComponent = newNavigationComponent;
@@ -182,7 +193,13 @@ export default class MainPresenter {
   };
 
   #renderFilm = (filmData, container) => {
-    const filmPresenter = new FilmPresenter(container, this.#handleFilmChange, this.#handleFilterChange, this.popupPresenter);
+    const filmPresenter = new FilmPresenter(
+      container,
+      this.#handleFilmChange,
+      this.#handleFilterChange,
+      this.popupPresenter,
+      this.popupComponent
+    );
     const filmComments = this.#comments[filmData.id - 1];
 
     filmPresenter.init(filmData, filmComments);

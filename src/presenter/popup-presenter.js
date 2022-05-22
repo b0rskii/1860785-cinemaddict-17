@@ -1,4 +1,5 @@
 import PopupView from '../view/popup-view.js';
+import PopupControlsView from '../view/popup-controls-view.js';
 import {fixScrollbarOpen, fixScrollbarClose} from '../utils/common.js';
 import {render, remove, replace} from '../framework/render.js';
 import {FilterType} from '../const.js';
@@ -12,37 +13,42 @@ export default class PopupPresenter {
   #film = null;
 
   #popupComponent = null;
+  #prevPopupComponent = null;
   #popupContainer = null;
+  #popupControlsComponent = null;
 
   #popupStatus = Popup.NOT_RENDERED;
   #changeData = null;
   #changeFilter = null;
 
-  constructor (changeData, changeFilter) {
+  constructor (changeData, changeFilter, prevPopupComponent) {
     this.#changeData = changeData;
     this.#changeFilter = changeFilter;
+    this.#prevPopupComponent = prevPopupComponent;
   }
 
   init = (film, filmComments) => {
     this.#film = film;
 
-    const prevPopupComponent = this.#popupComponent;
+    const prevPopupControlsComponent = this.#popupControlsComponent;
 
     this.#popupComponent = new PopupView(film, filmComments);
     this.#popupContainer = this.#popupComponent.container;
+    this.#popupControlsComponent = new PopupControlsView(film);
 
-    if (prevPopupComponent === null) {
+    if (this.#prevPopupComponent.size === 0) {
       this.#renderPopup();
+      this.#prevPopupComponent.set(this.#film.id, this.#popupComponent);
       this.#popupStatus = Popup.RENDERED;
       return;
     }
 
     if (this.#popupStatus === Popup.RENDERED) {
-      replace(this.#popupComponent, prevPopupComponent);
+      replace(this.#popupControlsComponent, prevPopupControlsComponent);
       this.#setPopupClickHandlers();
     }
 
-    remove(prevPopupComponent);
+    remove(prevPopupControlsComponent);
   };
 
   destroy = () => {
@@ -51,15 +57,16 @@ export default class PopupPresenter {
 
   #setPopupClickHandlers = () => {
     this.#popupComponent.setClickHandler(this.#closePopup);
-    this.#popupComponent.setWatchlistClickHandler(this.#onPopupWatchlistControlClick);
-    this.#popupComponent.setWatchedClickHandler(this.#onPopupWatchedControlClick);
-    this.#popupComponent.setFavoriteClickHandler(this.#onPopupFavoriteControlClick);
+    this.#popupControlsComponent.setWatchlistClickHandler(this.#onPopupWatchlistControlClick);
+    this.#popupControlsComponent.setWatchedClickHandler(this.#onPopupWatchedControlClick);
+    this.#popupControlsComponent.setFavoriteClickHandler(this.#onPopupFavoriteControlClick);
   };
 
   #renderPopup = () => {
     fixScrollbarOpen();
 
     render(this.#popupComponent, this.#popupContainer);
+    render(this.#popupControlsComponent, this.#popupComponent.controlsContainer);
     this.#popupComponent.bodyAddHideOverflow();
 
     this.#setPopupClickHandlers();
@@ -73,6 +80,9 @@ export default class PopupPresenter {
     fixScrollbarClose();
 
     this.destroy();
+    if (this.#prevPopupComponent.size > 0) {
+      this.#prevPopupComponent.forEach((item) => remove(item));
+    }
     this.#popupStatus = Popup.NOT_RENDERED;
 
     this.#popupComponent.bodyRemoveHideOverflow();

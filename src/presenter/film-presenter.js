@@ -21,11 +21,12 @@ export default class FilmPresenter {
 
   #popup = null;
 
-  constructor (container, changeData, changeFilter, popup) {
+  constructor (container, changeData, changeFilter, popup, popupComponent) {
     this.#container = container;
     this.#changeData = changeData;
     this.#changeFilter = changeFilter;
     this.#popup = popup;
+    this.popupComponent = popupComponent;
   }
 
   init = (film, filmComments) => {
@@ -59,12 +60,14 @@ export default class FilmPresenter {
   };
 
   #onFilmCardClick = () => {
-    if (this.#popup.size > 0) {
+    if (this.#popup.size > 0 && !this.#popup.has(this.#film.id)) {
       this.#popup.forEach((item) => item.destroy());
       this.#popup.clear();
+      this.popupComponent.forEach((item) => remove(item));
+      this.popupComponent.clear();
     }
 
-    const popupPresenter = new PopupPresenter(this.#changeData, this.#changeFilter);
+    const popupPresenter = new PopupPresenter(this.#changeData, this.#changeFilter, this.popupComponent);
     popupPresenter.init(this.#film, this.#filmComments);
 
     this.#popup.set(this.#film.id, popupPresenter);
