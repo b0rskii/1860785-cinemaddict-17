@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import {Emoji} from '../const';
 
 const formatDescription = (string, maxLength = 140) => {
   if (string.length > maxLength) {
@@ -18,4 +19,26 @@ const formatDate = (date, format) => dayjs(date).format(format);
 
 const formatDateToUnix = (date) => dayjs(date).unix();
 
-export {formatDescription, formatRuntime, formatDate, formatDateToUnix};
+const checkReaction = (emoji) => {
+  if (emoji === Emoji.SMILE) {
+    return Emoji.SMILE_IMG;
+  }
+
+  if (emoji === Emoji.SLEEPING) {
+    return Emoji.SLEEPING_IMG;
+  }
+
+  if (emoji === Emoji.PUKE) {
+    return Emoji.PUKE_IMG;
+  }
+
+  if (emoji === Emoji.ANGRY) {
+    return Emoji.ANGRY_IMG;
+  }
+
+  return '';
+};
+
+const isEmojiChecked = (emojiValue, currentEmoji) => emojiValue === currentEmoji ? 'checked' : '';
+
+export {formatDescription, formatRuntime, formatDate, formatDateToUnix, checkReaction, isEmojiChecked};

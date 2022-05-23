@@ -19,13 +19,11 @@ export default class FilmPresenter {
   #changeData = null;
   #changeFilter = null;
 
-  #popup = null;
-
-  constructor (container, changeData, changeFilter, popup, popupComponent) {
+  constructor (container, changeData, changeFilter, popupPresenter, popupComponent) {
     this.#container = container;
     this.#changeData = changeData;
     this.#changeFilter = changeFilter;
-    this.#popup = popup;
+    this.popupPresenter = popupPresenter;
     this.popupComponent = popupComponent;
   }
 
@@ -60,17 +58,19 @@ export default class FilmPresenter {
   };
 
   #onFilmCardClick = () => {
-    if (this.#popup.size > 0 && !this.#popup.has(this.#film.id)) {
-      this.#popup.forEach((item) => item.destroy());
-      this.#popup.clear();
+    if (this.popupPresenter.size > 0 && !this.popupPresenter.has(this.#film.id)) {
+      this.popupPresenter.forEach((item) => item.destroy());
+      this.popupPresenter.clear();
       this.popupComponent.forEach((item) => remove(item));
       this.popupComponent.clear();
     }
 
-    const popupPresenter = new PopupPresenter(this.#changeData, this.#changeFilter, this.popupComponent);
-    popupPresenter.init(this.#film, this.#filmComments);
+    if (!this.popupPresenter.has(this.#film.id)) {
+      const newPopupPresenter = new PopupPresenter(this.#changeData, this.#changeFilter, this.popupPresenter, this.popupComponent);
+      newPopupPresenter.init(this.#film, this.#filmComments);
 
-    this.#popup.set(this.#film.id, popupPresenter);
+      this.popupPresenter.set(this.#film.id, newPopupPresenter);
+    }
   };
 
   #onWatchlistControlClick = () => {

@@ -1,5 +1,6 @@
 import PopupView from '../view/popup-view.js';
 import PopupControlsView from '../view/popup-controls-view.js';
+import PopupNewCommentView from '../view/popup-new-comment-view.js';
 import {fixScrollbarOpen, fixScrollbarClose} from '../utils/common.js';
 import {render, remove, replace} from '../framework/render.js';
 import {FilterType} from '../const.js';
@@ -13,28 +14,32 @@ export default class PopupPresenter {
   #film = null;
 
   #popupComponent = null;
+  #popupPresenter = null;
   #prevPopupComponent = null;
   #popupContainer = null;
-  #popupControlsComponent = null;
+  #controlsComponent = null;
+  #newCommentComponent = null;
 
   #popupStatus = Popup.NOT_RENDERED;
   #changeData = null;
   #changeFilter = null;
 
-  constructor (changeData, changeFilter, prevPopupComponent) {
+  constructor (changeData, changeFilter, popupPresenter, prevPopupComponent) {
     this.#changeData = changeData;
     this.#changeFilter = changeFilter;
+    this.#popupPresenter = popupPresenter;
     this.#prevPopupComponent = prevPopupComponent;
   }
 
   init = (film, filmComments) => {
     this.#film = film;
 
-    const prevPopupControlsComponent = this.#popupControlsComponent;
+    const prevControlsComponent = this.#controlsComponent;
 
     this.#popupComponent = new PopupView(film, filmComments);
     this.#popupContainer = this.#popupComponent.container;
-    this.#popupControlsComponent = new PopupControlsView(film);
+    this.#controlsComponent = new PopupControlsView(film);
+    this.#newCommentComponent = new PopupNewCommentView(film);
 
     if (this.#prevPopupComponent.size === 0) {
       this.#renderPopup();
@@ -44,11 +49,11 @@ export default class PopupPresenter {
     }
 
     if (this.#popupStatus === Popup.RENDERED) {
-      replace(this.#popupControlsComponent, prevPopupControlsComponent);
+      replace(this.#controlsComponent, prevControlsComponent);
       this.#setPopupClickHandlers();
     }
 
-    remove(prevPopupControlsComponent);
+    remove(prevControlsComponent);
   };
 
   destroy = () => {
@@ -57,16 +62,17 @@ export default class PopupPresenter {
 
   #setPopupClickHandlers = () => {
     this.#popupComponent.setClickHandler(this.#closePopup);
-    this.#popupControlsComponent.setWatchlistClickHandler(this.#onPopupWatchlistControlClick);
-    this.#popupControlsComponent.setWatchedClickHandler(this.#onPopupWatchedControlClick);
-    this.#popupControlsComponent.setFavoriteClickHandler(this.#onPopupFavoriteControlClick);
+    this.#controlsComponent.setWatchlistClickHandler(this.#onPopupWatchlistControlClick);
+    this.#controlsComponent.setWatchedClickHandler(this.#onPopupWatchedControlClick);
+    this.#controlsComponent.setFavoriteClickHandler(this.#onPopupFavoriteControlClick);
   };
 
   #renderPopup = () => {
     fixScrollbarOpen();
 
     render(this.#popupComponent, this.#popupContainer);
-    render(this.#popupControlsComponent, this.#popupComponent.controlsContainer);
+    render(this.#controlsComponent, this.#popupComponent.controlsContainer);
+    render(this.#newCommentComponent, this.#popupComponent.newCommentContainer);
     this.#popupComponent.bodyAddHideOverflow();
 
     this.#setPopupClickHandlers();
@@ -80,9 +86,13 @@ export default class PopupPresenter {
     fixScrollbarClose();
 
     this.destroy();
+    this.#popupPresenter.clear();
+
     if (this.#prevPopupComponent.size > 0) {
       this.#prevPopupComponent.forEach((item) => remove(item));
+      this.#prevPopupComponent.clear();
     }
+
     this.#popupStatus = Popup.NOT_RENDERED;
 
     this.#popupComponent.bodyRemoveHideOverflow();
