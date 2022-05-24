@@ -35,4 +35,15 @@ const UserRank = {
   }
 };
 
-export {FilterType, ActiveClass, SortType, UserRank};
+const Emoji = {
+  SMILE: 'smile',
+  SLEEPING: 'sleeping',
+  PUKE: 'puke',
+  ANGRY: 'angry',
+  SMILE_IMG: '<img src="./images/emoji/smile.png" width="55" height="55" alt="emoji">',
+  SLEEPING_IMG: '<img src="./images/emoji/sleeping.png" width="55" height="55" alt="emoji">',
+  PUKE_IMG: '<img src="./images/emoji/puke.png" width="55" height="55" alt="emoji">',
+  ANGRY_IMG: '<img src="./images/emoji/angry.png" width="55" height="55" alt="emoji">'
+};
+
+export {FilterType, ActiveClass, SortType, UserRank, Emoji};

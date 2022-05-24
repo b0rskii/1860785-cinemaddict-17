@@ -1,7 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import {formatRuntime, formatDate} from '../utils/film.js';
-import {addClassByCondition} from '../utils/common.js';
-import {ActiveClass} from '../const.js';
 
 const Format = {
   RELEASE_DATE: 'DD MMMM YYYY',
@@ -55,9 +53,6 @@ export default class PopupView extends AbstractView {
   #description = null;
   #commentCount = null;
   #filmComments = null;
-  #isWatchlistFilm = null;
-  #isWatchedFilm = null;
-  #isFavoriteFilm = null;
 
   constructor (film, comments) {
     super();
@@ -77,9 +72,6 @@ export default class PopupView extends AbstractView {
     this.#description = film.filmInfo.description;
     this.#commentCount = film.commentsId.length;
     this.#filmComments = comments;
-    this.#isWatchlistFilm = film.userDetails.watchlist;
-    this.#isWatchedFilm = film.userDetails.alreadyWatched;
-    this.#isFavoriteFilm = film.userDetails.favorite;
   }
 
   get template() {
@@ -146,12 +138,6 @@ export default class PopupView extends AbstractView {
                       </p>
                     </div>
                   </div>
-
-                  <section class="film-details__controls">
-                    <button type="button" class="film-details__control-button film-details__control-button--watchlist ${addClassByCondition(this.#isWatchlistFilm, ActiveClass.FILM_POPUP_CONTROL)}" id="watchlist" name="watchlist">Add to watchlist</button>
-                    <button type="button" class="film-details__control-button film-details__control-button--watched ${addClassByCondition(this.#isWatchedFilm, ActiveClass.FILM_POPUP_CONTROL)}" id="watched" name="watched">Already watched</button>
-                    <button type="button" class="film-details__control-button film-details__control-button--favorite ${addClassByCondition(this.#isFavoriteFilm, ActiveClass.FILM_POPUP_CONTROL)}" id="favorite" name="favorite">Add to favorites</button>
-                  </section>
                 </div>
 
                 <div class="film-details__bottom-container">
@@ -161,36 +147,6 @@ export default class PopupView extends AbstractView {
                     <ul class="film-details__comments-list">
                       ${createCommentsTemplate(this.#filmComments)}
                     </ul>
-
-                    <div class="film-details__new-comment">
-                      <div class="film-details__add-emoji-label"></div>
-
-                      <label class="film-details__comment-label">
-                        <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"></textarea>
-                      </label>
-
-                      <div class="film-details__emoji-list">
-                        <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-smile" value="smile">
-                        <label class="film-details__emoji-label" for="emoji-smile">
-                          <img src="./images/emoji/smile.png" width="30" height="30" alt="emoji">
-                        </label>
-
-                        <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-sleeping" value="sleeping">
-                        <label class="film-details__emoji-label" for="emoji-sleeping">
-                          <img src="./images/emoji/sleeping.png" width="30" height="30" alt="emoji">
-                        </label>
-
-                        <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-puke" value="puke">
-                        <label class="film-details__emoji-label" for="emoji-puke">
-                          <img src="./images/emoji/puke.png" width="30" height="30" alt="emoji">
-                        </label>
-
-                        <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-angry" value="angry">
-                        <label class="film-details__emoji-label" for="emoji-angry">
-                          <img src="./images/emoji/angry.png" width="30" height="30" alt="emoji">
-                        </label>
-                      </div>
-                    </div>
                   </section>
                 </div>
               </form>
@@ -201,7 +157,13 @@ export default class PopupView extends AbstractView {
     return document.querySelector('body');
   }
 
-  checkPopupPresence = () => document.querySelector('.film-details');
+  get controlsContainer() {
+    return this.element.querySelector('.film-details__top-container');
+  }
+
+  get newCommentContainer() {
+    return this.element.querySelector('.film-details__comments-wrap');
+  }
 
   bodyAddHideOverflow = () => {
     document.querySelector('body').classList.add('hide-overflow');
@@ -216,34 +178,7 @@ export default class PopupView extends AbstractView {
     this.element.querySelector('.film-details__close-btn').addEventListener('click', this.#closeButtonClickHandler);
   };
 
-  setWatchlistClickHandler = (callback) => {
-    this._callback.watchlistClick = callback;
-    this.element.querySelector('.film-details__control-button--watchlist').addEventListener('click', this.#watchlistClickHandler);
-  };
-
-  setWatchedClickHandler = (callback) => {
-    this._callback.watchedClick = callback;
-    this.element.querySelector('.film-details__control-button--watched').addEventListener('click', this.#watchedClickHandler);
-  };
-
-  setFavoriteClickHandler = (callback) => {
-    this._callback.favoriteClick = callback;
-    this.element.querySelector('.film-details__control-button--favorite').addEventListener('click', this.#favoriteClickHandler);
-  };
-
   #closeButtonClickHandler = () => {
     this._callback.closeButtonClick();
-  };
-
-  #watchlistClickHandler = () => {
-    this._callback.watchlistClick();
-  };
-
-  #watchedClickHandler = () => {
-    this._callback.watchedClick();
-  };
-
-  #favoriteClickHandler = () => {
-    this._callback.favoriteClick();
   };
 }

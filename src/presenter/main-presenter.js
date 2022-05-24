@@ -58,6 +58,8 @@ export default class MainPresenter {
     this.#container = container;
     this.#filmsModel = filmsModel;
     this.#renderedFilmCardsCount = 0;
+    this.popupPresenter = new Map();
+    this.popupComponent = new Map();
   }
 
   init = () => {
@@ -75,7 +77,12 @@ export default class MainPresenter {
   };
 
   #renderNavigation = () => {
-    this.#navigationComponent = new NavigationView(this.#watchlistFilms, this.#alreadyWatchedFilms, this.#favoriteFilms, this.#currentFilterType);
+    this.#navigationComponent = new NavigationView(
+      this.#watchlistFilms,
+      this.#alreadyWatchedFilms,
+      this.#favoriteFilms,
+      this.#currentFilterType
+    );
     render(this.#navigationComponent, this.#container);
     this.#navigationComponent.setClickHandler(this.#onFilterClick);
   };
@@ -103,48 +110,39 @@ export default class MainPresenter {
     render(this.#noFilmsComponent, this.#filmsSectionComponent.element);
   };
 
-  #handlePopupStatusChange = () => {
-    this.#filmPresenter.forEach((item) => item.removePopupView());
-    this.#filmPresenterFirstExtra.forEach((item) => item.removePopupView());
-    this.#filmPresenterSecondExtra.forEach((item) => item.removePopupView());
+  #changeFilm = (newFilm, filmPresenter) => {
+    const renderedFilmsIndificators = filmPresenter.keys();
+
+    for (const renderedFilmId of renderedFilmsIndificators) {
+      if (renderedFilmId === newFilm.id) {
+        filmPresenter.get(newFilm.id).init(newFilm, this.#comments[newFilm.id - 1]);
+      }
+    }
   };
 
   #handleFilmChange = (updatedFilm) => {
     this.#mainFilms = updateItem(this.#mainFilms, updatedFilm);
     this.#sourcedMainFilms = updateItem(this.#sourcedMainFilms, updatedFilm);
 
-    const renderedFilmsIndificators = this.#filmPresenter.keys();
-    for (const renderedFilmId of renderedFilmsIndificators) {
-      if (renderedFilmId === updatedFilm.id) {
-        this.#filmPresenter.get(updatedFilm.id).init(updatedFilm, this.#comments[updatedFilm.id - 1]);
-      }
-    }
+    this.#changeFilm(updatedFilm, this.#filmPresenter);
+    this.#changeFilm(updatedFilm, this.#filmPresenterFirstExtra);
+    this.#changeFilm(updatedFilm, this.#filmPresenterSecondExtra);
 
-    const firstExtraFilmsIndificators = this.#filmPresenterFirstExtra.keys();
-    for (const extraFilmId of firstExtraFilmsIndificators) {
-      if (extraFilmId === updatedFilm.id) {
-        this.#filmPresenterFirstExtra.get(updatedFilm.id).init(updatedFilm, this.#comments[updatedFilm.id - 1]);
-      }
-    }
-
-    const secondExtraFilmsIndificators = this.#filmPresenterSecondExtra.keys();
-    for (const extraFilmId of secondExtraFilmsIndificators) {
-      if (extraFilmId === updatedFilm.id) {
-        this.#filmPresenterSecondExtra.get(updatedFilm.id).init(updatedFilm, this.#comments[updatedFilm.id - 1]);
-      }
+    if (this.popupPresenter.get(updatedFilm.id)) {
+      this.popupPresenter.get(updatedFilm.id).init(updatedFilm, this.#comments[updatedFilm.id - 1]);
     }
   };
 
   #updateFilmsListIfFilterActive = (filterType, filterData) => {
     if (this.#currentFilterType === filterType) {
-      const renderedFilmsCount = this.#filmPresenter.size;
+      const renderedFilmsCount = this.#renderedFilmCardsCount;
 
-      if (filterData.length === this.#filmPresenter.size - 1) {
+      if (filterData.length === renderedFilmsCount - 1) {
         this.#clearFilmsList();
-        this.#renderFilteredFilms(filterData, renderedFilmsCount - 1);
+        this.#renderFilteredFilmsConsideringSorting(filterData, renderedFilmsCount - 1);
       } else {
         this.#clearFilmsList();
-        this.#renderFilteredFilms(filterData, renderedFilmsCount);
+        this.#renderFilteredFilmsConsideringSorting(filterData, renderedFilmsCount);
       }
     }
   };
@@ -153,7 +151,7 @@ export default class MainPresenter {
     switch (filter) {
       case FilterType.WATCHLIST:
         if (film.userDetails.watchlist) {
-          this.#watchlistFilms.push(film);
+          this.#watchlistFilms = this.#sourcedMainFilms.filter((item) => item.userDetails.watchlist === true);
           this.#updateFilmsListIfFilterActive(FilterType.WATCHLIST, this.#watchlistFilms);
         } else {
           this.#watchlistFilms = this.#watchlistFilms.filter((item) => item !== film);
@@ -163,7 +161,7 @@ export default class MainPresenter {
 
       case FilterType.WATCHED:
         if (film.userDetails.alreadyWatched) {
-          this.#alreadyWatchedFilms.push(film);
+          this.#alreadyWatchedFilms = this.#sourcedMainFilms.filter((item) => item.userDetails.alreadyWatched === true);
           this.#updateFilmsListIfFilterActive(FilterType.WATCHED, this.#alreadyWatchedFilms);
         } else {
           this.#alreadyWatchedFilms = this.#alreadyWatchedFilms.filter((item) => item !== film);
@@ -173,7 +171,7 @@ export default class MainPresenter {
 
       case FilterType.FAVORITES:
         if (film.userDetails.favorite) {
-          this.#favoriteFilms.push(film);
+          this.#favoriteFilms = this.#sourcedMainFilms.filter((item) => item.userDetails.favorite === true);
           this.#updateFilmsListIfFilterActive(FilterType.FAVORITES, this.#favoriteFilms);
         } else {
           this.#favoriteFilms = this.#favoriteFilms.filter((item) => item !== film);
@@ -182,7 +180,12 @@ export default class MainPresenter {
         break;
     }
 
-    const newNavigationComponent = new NavigationView(this.#watchlistFilms, this.#alreadyWatchedFilms, this.#favoriteFilms, this.#currentFilterType);
+    const newNavigationComponent = new NavigationView(
+      this.#watchlistFilms,
+      this.#alreadyWatchedFilms,
+      this.#favoriteFilms,
+      this.#currentFilterType
+    );
 
     replace(newNavigationComponent, this.#navigationComponent);
     this.#navigationComponent = newNavigationComponent;
@@ -190,8 +193,15 @@ export default class MainPresenter {
   };
 
   #renderFilm = (filmData, container) => {
-    const filmPresenter = new FilmPresenter(container, this.#handleFilmChange, this.#handlePopupStatusChange, this.#handleFilterChange);
+    const filmPresenter = new FilmPresenter(
+      container,
+      this.#handleFilmChange,
+      this.#handleFilterChange,
+      this.popupPresenter,
+      this.popupComponent
+    );
     const filmComments = this.#comments[filmData.id - 1];
+
     filmPresenter.init(filmData, filmComments);
 
     switch (container) {
@@ -224,7 +234,7 @@ export default class MainPresenter {
 
     this.#renderedFilmCardsCount += renderCount;
 
-    if (data.length === remainingFilmCardsCount && data.length > count) {
+    if (data.length === remainingFilmCardsCount && data.length > count && count >= RenderCount.FILM_CARDS) {
       this.#renderShowMoreButton(this.#filmsListSectionComponent.element);
       this.#showMoreButtonComponent.setClickHandler(() => this.#renderPartFilmCards(count, data));
     }
@@ -253,8 +263,8 @@ export default class MainPresenter {
     remove(this.#showMoreButtonComponent);
   };
 
-  #renderFilteredFilms = (filteredData, renderCount = RenderCount.FILM_CARDS) => {
-    if (filteredData.length === 0 && this.#filmsListContainerComponent.checkOnFilmsListPresence()) {
+  #renderComponentsDependingOnFilmsPresence = (films) => {
+    if (films.length === 0 && this.#filmsListContainerComponent.checkOnFilmsListPresence()) {
       this.#noFilmsComponent = new NoFilmsView(this.#currentFilterType);
 
       remove(this.#filmsListContainerComponent);
@@ -264,7 +274,7 @@ export default class MainPresenter {
       return;
     }
 
-    if (filteredData.length === 0 && this.#noFilmsComponent.element) {
+    if (films.length === 0 && this.#noFilmsComponent.element) {
       const newNoFilmsComponent = new NoFilmsView(this.#currentFilterType);
 
       replace(newNoFilmsComponent, this.#noFilmsComponent);
@@ -274,29 +284,37 @@ export default class MainPresenter {
       return;
     }
 
-    if (filteredData.length !== 0 && !this.#filmsListContainerComponent.checkOnFilmsListPresence()) {
+    if (films.length !== 0 && !this.#filmsListContainerComponent.checkOnFilmsListPresence()) {
       replace(this.#filmsListSectionComponent, this.#noFilmsComponent);
       render(this.#filmsListContainerComponent, this.#filmsListSectionComponent.element);
       this.#renderSort(this.#navigationComponent.element, RenderPosition.AFTEREND);
 
     }
+  };
+
+  #renderFilteredFilms = (filteredData, renderCount = RenderCount.FILM_CARDS) => {
+    this.#renderComponentsDependingOnFilmsPresence(filteredData);
 
     this.#mainFilms = [...filteredData];
     this.#renderPartFilmCards(renderCount, this.#mainFilms);
+  };
 
-    // switch (this.#currentSortType) {
-    //   case SortType.BY_DATE:
-    //     this.#mainFilms = [...filteredData].sort((a, b) => formatDateToUnix(b.filmInfo.release.date) - formatDateToUnix(a.filmInfo.release.date));
-    //     this.#renderPartFilmCards(renderCount, this.#mainFilms);
-    //     break;
-    //   case SortType.BY_RAITING:
-    //     this.#mainFilms = [...filteredData].sort((a, b) => b.filmInfo.totalRating - a.filmInfo.totalRating);
-    //     this.#renderPartFilmCards(renderCount, this.#mainFilms);
-    //     break;
-    //   default:
-    //     this.#mainFilms = [...filteredData];
-    //     this.#renderPartFilmCards(renderCount, this.#mainFilms);
-    // }
+  #renderFilteredFilmsConsideringSorting = (filteredData, renderCount = RenderCount.FILM_CARDS) => {
+    this.#renderComponentsDependingOnFilmsPresence(filteredData);
+
+    switch (this.#currentSortType) {
+      case SortType.BY_DATE:
+        this.#mainFilms = [...filteredData].sort((a, b) => formatDateToUnix(b.filmInfo.release.date) - formatDateToUnix(a.filmInfo.release.date));
+        this.#renderPartFilmCards(renderCount, this.#mainFilms);
+        break;
+      case SortType.BY_RAITING:
+        this.#mainFilms = [...filteredData].sort((a, b) => b.filmInfo.totalRating - a.filmInfo.totalRating);
+        this.#renderPartFilmCards(renderCount, this.#mainFilms);
+        break;
+      default:
+        this.#mainFilms = [...filteredData];
+        this.#renderPartFilmCards(renderCount, this.#mainFilms);
+    }
   };
 
   #onFilterClick = (filterType) => {
