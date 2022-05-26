@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import {formatRuntime, formatDate} from '../utils/film.js';
+import {formatRuntime, formatDate, formatDateFromNow} from '../utils/film.js';
 
 const Format = {
   RELEASE_DATE: 'DD MMMM YYYY',
@@ -26,7 +26,7 @@ const createCommentsTemplate = (comments) => {
         <p class="film-details__comment-text">${item.comment}</p>
         <p class="film-details__comment-info">
           <span class="film-details__comment-author">${item.author}</span>
-          <span class="film-details__comment-day">${formatDate(item.date, Format.COMMENT_DATE)}</span>
+          <span class="film-details__comment-day">${formatDateFromNow(item.date)}</span>
           <button class="film-details__comment-delete">Delete</button>
         </p>
       </div>
