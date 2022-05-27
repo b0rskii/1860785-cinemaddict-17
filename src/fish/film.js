@@ -110,10 +110,10 @@ const generateEmoji = () => {
 const generateBoolean = () => Boolean(getRandomInteger(0, 1));
 
 const generateDate = () => {
-  const maxYearsGap = -20;
-  const yearsGap = getRandomInteger(maxYearsGap, 0);
+  const maxGap = -5;
+  const gap = getRandomInteger(maxGap, 0);
 
-  return dayjs().add(yearsGap, 'year').toDate();
+  return dayjs().add(gap, 'day').add(gap, 'month').add(gap, 'year').toDate();
 };
 
 const generateFilm = () => ({
@@ -155,7 +155,7 @@ const generateComment = () => ({
   id: generateCommentId(),
   author: 'Ilya O\'Reilly',
   comment: 'a film that changed my life, a true masterpiece, post-credit scene was just amazing omg.',
-  date: '2019-05-11T16:12:32.554Z',
+  date: generateDate(),
   emotion: generateEmoji()
 });
 

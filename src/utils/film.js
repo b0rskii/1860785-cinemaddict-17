@@ -1,5 +1,8 @@
 import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import {Emoji} from '../const';
+
+dayjs.extend(relativeTime);
 
 const formatDescription = (string, maxLength = 140) => {
   if (string.length > maxLength) {
@@ -16,6 +19,8 @@ const formatRuntime = (minutes) => {
 };
 
 const formatDate = (date, format) => dayjs(date).format(format);
+
+const formatDateFromNow = (date) => dayjs(date).fromNow();
 
 const formatDateToUnix = (date) => dayjs(date).unix();
 
@@ -41,4 +46,4 @@ const checkReaction = (emoji) => {
 
 const isEmojiChecked = (emojiValue, currentEmoji) => emojiValue === currentEmoji ? 'checked' : '';
 
-export {formatDescription, formatRuntime, formatDate, formatDateToUnix, checkReaction, isEmojiChecked};
+export {formatDescription, formatRuntime, formatDate, formatDateFromNow, formatDateToUnix, checkReaction, isEmojiChecked};
