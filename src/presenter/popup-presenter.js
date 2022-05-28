@@ -3,7 +3,7 @@ import PopupControlsView from '../view/popup-controls-view.js';
 import PopupNewCommentView from '../view/popup-new-comment-view.js';
 import {fixScrollbarOpen, fixScrollbarClose} from '../utils/common.js';
 import {render, remove, replace} from '../framework/render.js';
-import {FilterType} from '../const.js';
+import {UserAction, UpdateType} from '../const.js';
 
 const Popup = {
   RENDERED: 'RENDERED',
@@ -22,11 +22,9 @@ export default class PopupPresenter {
 
   #popupStatus = Popup.NOT_RENDERED;
   #changeData = null;
-  #changeFilter = null;
 
-  constructor (changeData, changeFilter, popupPresenter, prevPopupComponent) {
+  constructor (changeData, popupPresenter, prevPopupComponent) {
     this.#changeData = changeData;
-    this.#changeFilter = changeFilter;
     this.#popupPresenter = popupPresenter;
     this.#prevPopupComponent = prevPopupComponent;
   }
@@ -107,19 +105,16 @@ export default class PopupPresenter {
 
   #onPopupWatchlistControlClick = () => {
     this.#film.userDetails.watchlist = !(this.#film.userDetails.watchlist);
-    this.#changeData(this.#film);
-    this.#changeFilter(this.#film, FilterType.WATCHLIST);
+    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
   };
 
   #onPopupWatchedControlClick = () => {
     this.#film.userDetails.alreadyWatched = !(this.#film.userDetails.alreadyWatched);
-    this.#changeData(this.#film);
-    this.#changeFilter(this.#film, FilterType.WATCHED);
+    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
   };
 
   #onPopupFavoriteControlClick = () => {
     this.#film.userDetails.favorite = !(this.#film.userDetails.favorite);
-    this.#changeData(this.#film);
-    this.#changeFilter(this.#film, FilterType.FAVORITES);
+    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
   };
 }

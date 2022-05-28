@@ -23,20 +23,15 @@ export default class NoFilmsView extends AbstractView {
   }
 
   #defineMessage = (filter) => {
-    if (filter === FilterType.ALL) {
-      return EmptyFilterMessage.ALL;
-    }
-
-    if (filter === FilterType.WATCHLIST) {
-      return EmptyFilterMessage.WATCHLIST;
-    }
-
-    if (filter === FilterType.WATCHED) {
-      return EmptyFilterMessage.WATCHED;
-    }
-
-    if (filter === FilterType.FAVORITES) {
-      return EmptyFilterMessage.FAVORITES;
+    switch (filter) {
+      case FilterType.WATCHLIST:
+        return EmptyFilterMessage.WATCHLIST;
+      case FilterType.WATCHED:
+        return EmptyFilterMessage.WATCHED;
+      case FilterType.FAVORITES:
+        return EmptyFilterMessage.FAVORITES;
+      default:
+        return EmptyFilterMessage.ALL;
     }
   };
 }

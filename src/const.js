@@ -46,4 +46,16 @@ const Emoji = {
   ANGRY_IMG: '<img src="./images/emoji/angry.png" width="55" height="55" alt="emoji">'
 };
 
-export {FilterType, ActiveClass, SortType, UserRank, Emoji};
+const UserAction = {
+  UPDATE_FILM: 'UPDATE_FILM',
+  ADD_COMMENT: 'ADD_COMMENT',
+  DELETE_COMMENT: 'DELETE_COMMENT'
+};
+
+const UpdateType = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR'
+};
+
+export {FilterType, ActiveClass, SortType, UserRank, Emoji, UserAction, UpdateType};
