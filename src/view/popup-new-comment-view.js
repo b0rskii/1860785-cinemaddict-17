@@ -2,6 +2,7 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import {Emoji} from '../const.js';
 import {checkReaction, isEmojiChecked} from '../utils/film.js';
 import dayjs from 'dayjs';
+import he from 'he';
 
 export default class PopupNewCommentView extends AbstractStatefulView {
   #comments = [];
@@ -99,7 +100,7 @@ export default class PopupNewCommentView extends AbstractStatefulView {
       const newComment = {
         id: this.#newCommentId,
         author: 'Ilya O\'Reilly',
-        comment: this._state.comment,
+        comment: he.encode(this._state.comment),
         date: dayjs().toDate(),
         emotion: this._state.emotion
       };
