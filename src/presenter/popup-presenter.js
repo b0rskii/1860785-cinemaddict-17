@@ -1,5 +1,6 @@
 import PopupView from '../view/popup-view.js';
 import PopupControlsView from '../view/popup-controls-view.js';
+import PopupCommentsView from '../view/popup-comments-view.js';
 import PopupNewCommentView from '../view/popup-new-comment-view.js';
 import {fixScrollbarOpen, fixScrollbarClose} from '../utils/common.js';
 import {render, remove, replace} from '../framework/render.js';
@@ -12,12 +13,14 @@ const Popup = {
 
 export default class PopupPresenter {
   #film = null;
+  #filmComments = [];
 
   #popupComponent = null;
   #popupPresenter = null;
   #prevPopupComponent = null;
   #popupContainer = null;
   #controlsComponent = null;
+  #commentsComponent = null;
   #newCommentComponent = null;
 
   #popupStatus = Popup.NOT_RENDERED;
@@ -29,15 +32,18 @@ export default class PopupPresenter {
     this.#prevPopupComponent = prevPopupComponent;
   }
 
-  init = (film, filmComments) => {
+  init = (film, filmComments, comments) => {
     this.#film = film;
+    this.#filmComments = filmComments;
 
     const prevControlsComponent = this.#controlsComponent;
+    const prevCommentsComponent = this.#commentsComponent;
 
-    this.#popupComponent = new PopupView(film, filmComments);
+    this.#popupComponent = new PopupView(film);
     this.#popupContainer = this.#popupComponent.container;
     this.#controlsComponent = new PopupControlsView(film);
-    this.#newCommentComponent = new PopupNewCommentView(film);
+    this.#commentsComponent = new PopupCommentsView(filmComments);
+    this.#newCommentComponent = new PopupNewCommentView(film, comments);
 
     if (this.#prevPopupComponent.size === 0) {
       this.#renderPopup();
@@ -48,21 +54,25 @@ export default class PopupPresenter {
 
     if (this.#popupStatus === Popup.RENDERED) {
       replace(this.#controlsComponent, prevControlsComponent);
-      this.#setPopupClickHandlers();
+      replace(this.#commentsComponent, prevCommentsComponent);
+      this.#setPopupHandlers();
     }
 
     remove(prevControlsComponent);
+    remove(prevCommentsComponent);
   };
 
   destroy = () => {
     remove(this.#popupComponent);
+    document.removeEventListener('keydown', this.#onPopupEscapeKeydown);
   };
 
-  #setPopupClickHandlers = () => {
+  #setPopupHandlers = () => {
     this.#popupComponent.setClickHandler(this.#closePopup);
     this.#controlsComponent.setWatchlistClickHandler(this.#onPopupWatchlistControlClick);
     this.#controlsComponent.setWatchedClickHandler(this.#onPopupWatchedControlClick);
     this.#controlsComponent.setFavoriteClickHandler(this.#onPopupFavoriteControlClick);
+    this.#commentsComponent.setDeleteButtonClickHandler(this.#onCommentDeleteButtonClick);
   };
 
   #renderPopup = () => {
@@ -70,10 +80,13 @@ export default class PopupPresenter {
 
     render(this.#popupComponent, this.#popupContainer);
     render(this.#controlsComponent, this.#popupComponent.controlsContainer);
-    render(this.#newCommentComponent, this.#popupComponent.newCommentContainer);
+    render(this.#commentsComponent, this.#popupComponent.commentsContainer);
+    render(this.#newCommentComponent, this.#popupComponent.commentsContainer);
+
+    this.#newCommentComponent.setFormSubmitHandler(this.#onFormSubmit);
     this.#popupComponent.bodyAddHideOverflow();
 
-    this.#setPopupClickHandlers();
+    this.#setPopupHandlers();
 
     this.#popupStatus = Popup.RENDERED;
 
@@ -94,7 +107,6 @@ export default class PopupPresenter {
     this.#popupStatus = Popup.NOT_RENDERED;
 
     this.#popupComponent.bodyRemoveHideOverflow();
-    document.removeEventListener('keydown', this.#onPopupEscapeKeydown);
   };
 
   #onPopupEscapeKeydown = (evt) => {
@@ -105,16 +117,32 @@ export default class PopupPresenter {
 
   #onPopupWatchlistControlClick = () => {
     this.#film.userDetails.watchlist = !(this.#film.userDetails.watchlist);
-    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
+    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MAJOR, this.#film);
   };
 
   #onPopupWatchedControlClick = () => {
     this.#film.userDetails.alreadyWatched = !(this.#film.userDetails.alreadyWatched);
-    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
+    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MAJOR, this.#film);
   };
 
   #onPopupFavoriteControlClick = () => {
     this.#film.userDetails.favorite = !(this.#film.userDetails.favorite);
+    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MAJOR, this.#film);
+  };
+
+  #onCommentDeleteButtonClick = (commentId) => {
+    const comment = this.#filmComments.find((item) => item.id === Number(commentId));
+    this.#film.commentsId = this.#film.commentsId.filter((item) => item !== Number(commentId));
+
+    this.#changeData(UserAction.DELETE_COMMENT, UpdateType.PATCH, comment);
+    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
+  };
+
+  #onFormSubmit = (newComment) => {
+    this.#film.commentsId.push(newComment.id);
+
+    this.#changeData(UserAction.UPDATE_FILM, UpdateType.PATCH, this.#film);
+    this.#changeData(UserAction.ADD_COMMENT, UpdateType.PATCH, newComment);
     this.#changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
   };
 }

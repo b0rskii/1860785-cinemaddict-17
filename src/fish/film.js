@@ -8,7 +8,7 @@ const Amount = {
 
 const NumberFilmComments = {
   MIN: 0,
-  MAX: 10
+  MAX: 3
 };
 
 const TotalRaiting = {
