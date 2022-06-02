@@ -1,6 +1,7 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import {FilterType, ActiveClass} from '../const.js';
 import {addClassByCondition} from '../utils/common.js';
+import {filter} from '../utils/filter.js';
 
 export default class NavigationView extends AbstractView {
   #watchlistFilms = [];
@@ -8,11 +9,11 @@ export default class NavigationView extends AbstractView {
   #favoriteFilms = [];
   #activeFilter = null;
 
-  constructor (watchlistFilms, watchedFilms, favoriteFilms, activeFilter) {
+  constructor (films, activeFilter) {
     super();
-    this.#watchlistFilms = watchlistFilms;
-    this.#watchedFilms = watchedFilms;
-    this.#favoriteFilms = favoriteFilms;
+    this.#watchlistFilms = filter[FilterType.WATCHLIST](films);
+    this.#watchedFilms = filter[FilterType.WATCHED](films);
+    this.#favoriteFilms = filter[FilterType.FAVORITES](films);
     this.#activeFilter = activeFilter;
   }
 
@@ -28,9 +29,9 @@ export default class NavigationView extends AbstractView {
   changeActiveElement = (filterType) => {
     const filters = this.element.querySelectorAll('.main-navigation__item');
 
-    for (const filter of filters) {
-      if (filter.classList.contains(ActiveClass.NAVIGATION_ITEM)) {
-        filter.classList.remove(ActiveClass.NAVIGATION_ITEM);
+    for (const item of filters) {
+      if (item.classList.contains(ActiveClass.NAVIGATION_ITEM)) {
+        item.classList.remove(ActiveClass.NAVIGATION_ITEM);
         break;
       }
     }

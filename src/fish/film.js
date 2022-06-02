@@ -8,7 +8,7 @@ const Amount = {
 
 const NumberFilmComments = {
   MIN: 0,
-  MAX: 10
+  MAX: 3
 };
 
 const TotalRaiting = {
@@ -16,6 +16,8 @@ const TotalRaiting = {
   MAX: 8,
   DECIMAL_PLACES: 1
 };
+
+const MAX_DATE_GAP = -5;
 
 const filmsIndificators = getConsecutiveNumbers(Amount.FILMS);
 const commentsIndificators = getConsecutiveNumbers(Amount.COMMENTS);
@@ -110,8 +112,7 @@ const generateEmoji = () => {
 const generateBoolean = () => Boolean(getRandomInteger(0, 1));
 
 const generateDate = () => {
-  const maxGap = -5;
-  const gap = getRandomInteger(maxGap, 0);
+  const gap = getRandomInteger(MAX_DATE_GAP, 0);
 
   return dayjs().add(gap, 'day').add(gap, 'month').add(gap, 'year').toDate();
 };

@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import {formatRuntime, formatDate, formatDateFromNow} from '../utils/film.js';
+import {formatRuntime, formatDate} from '../utils/film.js';
 
 const Format = {
   RELEASE_DATE: 'DD MMMM YYYY',
@@ -10,28 +10,6 @@ const createGenreTemplate = (genres) => {
   const elements = [];
 
   genres.forEach((item) => elements.push(`<span class="film-details__genre">${item}</span>`));
-
-  return elements.join('');
-};
-
-const createCommentsTemplate = (comments) => {
-  const elements = [];
-
-  comments.forEach((item) => elements.push(
-    `<li class="film-details__comment">
-      <span class="film-details__comment-emoji">
-        <img src="./images/emoji/${item.emotion}.png" width="55" height="55" alt="emoji-smile">
-      </span>
-      <div>
-        <p class="film-details__comment-text">${item.comment}</p>
-        <p class="film-details__comment-info">
-          <span class="film-details__comment-author">${item.author}</span>
-          <span class="film-details__comment-day">${formatDateFromNow(item.date)}</span>
-          <button class="film-details__comment-delete">Delete</button>
-        </p>
-      </div>
-    </li>`
-  ));
 
   return elements.join('');
 };
@@ -51,10 +29,8 @@ export default class PopupView extends AbstractView {
   #genre = null;
   #genresTerm = null;
   #description = null;
-  #commentCount = null;
-  #filmComments = null;
 
-  constructor (film, comments) {
+  constructor (film) {
     super();
     this.#poster = film.filmInfo.poster;
     this.#ageRating = film.filmInfo.ageRating;
@@ -70,8 +46,6 @@ export default class PopupView extends AbstractView {
     this.#genre = film.filmInfo.genre;
     this.#genresTerm = this.#genre.length > 1 ? 'Genres' : 'Genre';
     this.#description = film.filmInfo.description;
-    this.#commentCount = film.commentsId.length;
-    this.#filmComments = comments;
   }
 
   get template() {
@@ -142,11 +116,7 @@ export default class PopupView extends AbstractView {
 
                 <div class="film-details__bottom-container">
                   <section class="film-details__comments-wrap">
-                    <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${this.#commentCount}</span></h3>
 
-                    <ul class="film-details__comments-list">
-                      ${createCommentsTemplate(this.#filmComments)}
-                    </ul>
                   </section>
                 </div>
               </form>
@@ -161,7 +131,7 @@ export default class PopupView extends AbstractView {
     return this.element.querySelector('.film-details__top-container');
   }
 
-  get newCommentContainer() {
+  get commentsContainer() {
     return this.element.querySelector('.film-details__comments-wrap');
   }
 

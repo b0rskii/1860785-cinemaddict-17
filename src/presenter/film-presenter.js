@@ -1,7 +1,7 @@
 import FilmCardView from '../view/film-card-view';
 import PopupPresenter from '../presenter/popup-presenter.js';
 import {render, remove, replace} from '../framework/render.js';
-import {FilterType} from '../const.js';
+import {UserAction, UpdateType} from '../const.js';
 
 const Film = {
   RENDERED: 'RENDERED',
@@ -17,14 +17,13 @@ export default class FilmPresenter {
 
   #filmStatus = Film.NOT_RENDERED;
   #changeData = null;
-  #changeFilter = null;
 
-  constructor (container, changeData, changeFilter, popupPresenter, popupComponent) {
+  constructor (container, changeData, popupPresenter, popupComponent, comments) {
     this.#container = container;
     this.#changeData = changeData;
-    this.#changeFilter = changeFilter;
     this.popupPresenter = popupPresenter;
     this.popupComponent = popupComponent;
+    this.comments = comments;
   }
 
   init = (film, filmComments) => {
@@ -66,8 +65,8 @@ export default class FilmPresenter {
     }
 
     if (!this.popupPresenter.has(this.#film.id)) {
-      const newPopupPresenter = new PopupPresenter(this.#changeData, this.#changeFilter, this.popupPresenter, this.popupComponent);
-      newPopupPresenter.init(this.#film, this.#filmComments);
+      const newPopupPresenter = new PopupPresenter(this.#changeData, this.popupPresenter, this.popupComponent);
+      newPopupPresenter.init(this.#film, this.#filmComments, this.comments);
 
       this.popupPresenter.set(this.#film.id, newPopupPresenter);
     }
@@ -75,19 +74,16 @@ export default class FilmPresenter {
 
   #onWatchlistControlClick = () => {
     this.#film.userDetails.watchlist = !(this.#film.userDetails.watchlist);
-    this.#changeData(this.#film);
-    this.#changeFilter(this.#film, FilterType.WATCHLIST);
+    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MAJOR, this.#film);
   };
 
   #onWatchedControlClick = () => {
     this.#film.userDetails.alreadyWatched = !(this.#film.userDetails.alreadyWatched);
-    this.#changeData(this.#film);
-    this.#changeFilter(this.#film, FilterType.WATCHED);
+    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MAJOR, this.#film);
   };
 
   #onFavoriteControlClick = () => {
     this.#film.userDetails.favorite = !(this.#film.userDetails.favorite);
-    this.#changeData(this.#film);
-    this.#changeFilter(this.#film, FilterType.FAVORITES);
+    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MAJOR, this.#film);
   };
 }

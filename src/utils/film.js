@@ -24,26 +24,37 @@ const formatDateFromNow = (date) => dayjs(date).fromNow();
 
 const formatDateToUnix = (date) => dayjs(date).unix();
 
+const sortByDate = (a, b) => formatDateToUnix(b.filmInfo.release.date) - formatDateToUnix(a.filmInfo.release.date);
+
+const sortByRaiting = (a, b) => b.filmInfo.totalRating - a.filmInfo.totalRating;
+
+const sortByCommentsCount = (a, b) => b.commentsId.length - a.commentsId.length;
+
 const checkReaction = (emoji) => {
-  if (emoji === Emoji.SMILE) {
-    return Emoji.SMILE_IMG;
+  switch (emoji) {
+    case Emoji.SMILE:
+      return Emoji.SMILE_IMG;
+    case Emoji.SLEEPING:
+      return Emoji.SLEEPING_IMG;
+    case Emoji.PUKE:
+      return Emoji.PUKE_IMG;
+    case Emoji.ANGRY:
+      return Emoji.ANGRY_IMG;
+    default:
+      return '';
   }
-
-  if (emoji === Emoji.SLEEPING) {
-    return Emoji.SLEEPING_IMG;
-  }
-
-  if (emoji === Emoji.PUKE) {
-    return Emoji.PUKE_IMG;
-  }
-
-  if (emoji === Emoji.ANGRY) {
-    return Emoji.ANGRY_IMG;
-  }
-
-  return '';
 };
 
 const isEmojiChecked = (emojiValue, currentEmoji) => emojiValue === currentEmoji ? 'checked' : '';
 
-export {formatDescription, formatRuntime, formatDate, formatDateFromNow, formatDateToUnix, checkReaction, isEmojiChecked};
+export {
+  formatDescription,
+  formatRuntime,
+  formatDate,
+  formatDateFromNow,
+  sortByDate,
+  sortByRaiting,
+  sortByCommentsCount,
+  checkReaction,
+  isEmojiChecked
+};
