@@ -2,6 +2,7 @@ import FilmPresenter from './film-presenter.js';
 import NavigationView from '../view/navigation-view.js';
 import SortView from '../view/sort-view.js';
 import FilmsSectionView from '../view/films-section-view.js';
+import LoadingView from '../view/loading-view.js';
 import NoFilmsView from '../view/no-films-view.js';
 import FilmsListSectionView from '../view/films-list-section-view.js';
 import FilmsListContainerView from '../view/films-list-container-view.js';
@@ -37,10 +38,12 @@ export default class MainPresenter {
   #currentFilterType = FilterType.ALL;
   #extraSectionStatus = ExtraSection;
   #renderedFilmCardsCount = 0;
+  #isLoading = true;
 
   #navigationComponent = null;
   #sortComponent = new SortView();
   #filmsSectionComponent = new FilmsSectionView();
+  #loadingComponent = new LoadingView();
   #noFilmsComponent = new NoFilmsView(this.#currentFilterType);
   #filmsListSectionComponent = new FilmsListSectionView();
   #filmsListContainerComponent = new FilmsListContainerView();
@@ -79,9 +82,7 @@ export default class MainPresenter {
     return filteredFilms;
   }
 
-  get comments() {
-    return [...this.#commentsModel.comments];
-  }
+  getFilmComments = (filmId) => this.#commentsModel.getFilmComments(filmId);
 
   init = () => {
     this.#renderNavigation();
@@ -94,7 +95,11 @@ export default class MainPresenter {
     if (this.#navigationComponent === null) {
       this.#navigationComponent = newNavigationComponent;
       render(this.#navigationComponent, this.#container);
-      this.#navigationComponent.setClickHandler(this.#onFilterClick);
+
+      if (!this.#isLoading) {
+        this.#navigationComponent.setClickHandler(this.#onFilterClick);
+      }
+
       return;
     }
 
@@ -111,6 +116,11 @@ export default class MainPresenter {
   #renderInitialFilmsLists = () => {
     render(this.#filmsSectionComponent, this.#container);
 
+    if (this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
+
     if (this.sourceFilms.length === 0) {
       this.#renderNoFilms();
     } else {
@@ -120,6 +130,10 @@ export default class MainPresenter {
       this.#renderPartFilmCards(RenderCount.FILM_CARDS, this.sourceFilms);
       this.#renderExtra({first: true, second: true});
     }
+  };
+
+  #renderLoading = () => {
+    render(this.#loadingComponent, this.#filmsSectionComponent.element);
   };
 
   #renderNoFilms = () => {
@@ -142,6 +156,13 @@ export default class MainPresenter {
 
   #handleModelEvent = (updateType, data) => {
     switch (updateType) {
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#filmsSectionComponent);
+        remove(this.#loadingComponent);
+        this.#renderInitialFilmsLists();
+        this.#renderNavigation();
+        break;
       case UpdateType.PATCH:
         break;
       case UpdateType.MINOR:
@@ -161,7 +182,7 @@ export default class MainPresenter {
 
     for (const renderedFilmId of renderedFilmsIndificators) {
       if (renderedFilmId === newFilm.id) {
-        filmPresenter.get(newFilm.id).init(newFilm, this.comments);
+        filmPresenter.get(newFilm.id).init(newFilm, this.getFilmComments(newFilm.id));
       }
     }
   };
@@ -172,7 +193,7 @@ export default class MainPresenter {
     this.#changeFilm(updatedFilm, this.#filmPresenterSecondExtra);
 
     if (this.popupPresenter.get(updatedFilm.id)) {
-      this.popupPresenter.get(updatedFilm.id).init(updatedFilm, this.comments);
+      this.popupPresenter.get(updatedFilm.id).init(updatedFilm, this.getFilmComments(updatedFilm.id));
     }
   };
 
@@ -234,7 +255,7 @@ export default class MainPresenter {
       this.popupComponent
     );
 
-    filmPresenter.init(filmData, this.comments);
+    filmPresenter.init(filmData, this.getFilmComments);
 
     switch (container) {
       case this.#filmsListContainerComponent.element:

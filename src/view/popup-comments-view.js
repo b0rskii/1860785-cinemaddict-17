@@ -5,7 +5,7 @@ const createCommentsTemplate = (comments) => {
   const elements = [];
 
   comments.forEach((item) => elements.push(
-    `<li class="film-details__comment">
+    `<li class="film-details__comment" data-id="${item.id}">
       <span class="film-details__comment-emoji">
         <img src="./images/emoji/${item.emotion}.png" width="55" height="55" alt="emoji-smile">
       </span>
@@ -27,9 +27,9 @@ export default class PopupCommentsView extends AbstractView {
   #filmComments = [];
   #commentCount = null;
 
-  constructor (film, comments) {
+  constructor (filmComments) {
     super();
-    this.#filmComments = this.#getFilmComments(film, comments);
+    this.#filmComments = filmComments;
     this.#commentCount = this.#filmComments.length;
   }
 
@@ -41,17 +41,6 @@ export default class PopupCommentsView extends AbstractView {
               </ul>
             </div>`;
   }
-
-  #getFilmComments = (film, comments) => {
-    const filmComments = [];
-
-    film.comments.forEach((commentId) => {
-      const filmComment = comments.find((item) => item.id === commentId);
-      filmComments.push(filmComment);
-    });
-
-    return filmComments;
-  };
 
   setDeleteButtonClickHandler = (callback) => {
     this._callback.deleteClick = callback;

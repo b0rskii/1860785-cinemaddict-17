@@ -32,9 +32,9 @@ export default class PopupPresenter {
     this.#prevPopupComponent = prevPopupComponent;
   }
 
-  init = (film, comments) => {
+  init = async (film, comments) => {
     this.#film = film;
-    this.#comments = comments;
+    this.#comments = await comments(film.id);
 
     const prevControlsComponent = this.#controlsComponent;
     const prevCommentsComponent = this.#commentsComponent;
@@ -42,8 +42,8 @@ export default class PopupPresenter {
     this.#popupComponent = new PopupView(film);
     this.#popupContainer = this.#popupComponent.container;
     this.#controlsComponent = new PopupControlsView(film);
-    this.#commentsComponent = new PopupCommentsView(film, comments);
-    this.#newCommentComponent = new PopupNewCommentView(film, comments);
+    this.#commentsComponent = new PopupCommentsView(this.#comments);
+    this.#newCommentComponent = new PopupNewCommentView(film);
 
     if (this.#prevPopupComponent.size === 0) {
       this.#renderPopup();

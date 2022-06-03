@@ -1,12 +1,22 @@
 import Observable from '../framework/observable.js';
-import {Amount, generateComment} from '../fish/film.js';
 
 export default class CommentsModel extends Observable {
-  #comments = Array.from({length: Amount.COMMENTS}, generateComment);
+  #commentsApiService = null;
+  #comments = [];
 
-  get comments() {
-    return this.#comments;
+  constructor (commentsApiService) {
+    super();
+    this.#commentsApiService = commentsApiService;
   }
+
+  getFilmComments = async (filmId) => {
+    try {
+      this.#comments = await this.#commentsApiService.getFilmComments(filmId);
+      return [...this.#comments];
+    } catch {
+      return [];
+    }
+  };
 
   addComment = (updateType, update) => {
     this.#comments = [
@@ -18,7 +28,7 @@ export default class CommentsModel extends Observable {
   };
 
   deleteComment = (updateType, update) => {
-    const index = this.#comments.find((item) => item.id === update.id);
+    const index = this.#comments.findIndex((item) => item.id === update.id);
 
     if (index === -1) {
       throw new Error('Can\'t delete unexisting film');
