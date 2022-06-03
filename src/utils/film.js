@@ -28,7 +28,7 @@ const sortByDate = (a, b) => formatDateToUnix(b.filmInfo.release.date) - formatD
 
 const sortByRaiting = (a, b) => b.filmInfo.totalRating - a.filmInfo.totalRating;
 
-const sortByCommentsCount = (a, b) => b.commentsId.length - a.commentsId.length;
+const sortByCommentsCount = (a, b) => b.comments.length - a.comments.length;
 
 const checkReaction = (emoji) => {
   switch (emoji) {

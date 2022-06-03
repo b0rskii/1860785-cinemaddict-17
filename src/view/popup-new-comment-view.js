@@ -95,7 +95,7 @@ export default class PopupNewCommentView extends AbstractStatefulView {
 
   #formSubmitHandler = (evt) => {
     if (evt.key === 'Enter' && evt.ctrlKey === true && this._state.emotion !== '') {
-      this.#newCommentId = this.#comments.reduce((sum, item) => sum + item.length, 0) + 1;
+      this.#newCommentId = this.#comments.length + 1;
 
       const newComment = {
         id: this.#newCommentId,

@@ -5,7 +5,7 @@ const createCommentsTemplate = (comments) => {
   const elements = [];
 
   comments.forEach((item) => elements.push(
-    `<li class="film-details__comment" data-id="${item.id}">
+    `<li class="film-details__comment">
       <span class="film-details__comment-emoji">
         <img src="./images/emoji/${item.emotion}.png" width="55" height="55" alt="emoji-smile">
       </span>
@@ -24,23 +24,34 @@ const createCommentsTemplate = (comments) => {
 };
 
 export default class PopupCommentsView extends AbstractView {
-  #comments = [];
+  #filmComments = [];
   #commentCount = null;
 
-  constructor (comments) {
+  constructor (film, comments) {
     super();
-    this.#comments = comments;
-    this.#commentCount = this.#comments.length;
+    this.#filmComments = this.#getFilmComments(film, comments);
+    this.#commentCount = this.#filmComments.length;
   }
 
   get template() {
     return  `<div>
               <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${this.#commentCount}</span></h3>
               <ul class="film-details__comments-list">
-                ${createCommentsTemplate(this.#comments)}
+                ${createCommentsTemplate(this.#filmComments)}
               </ul>
             </div>`;
   }
+
+  #getFilmComments = (film, comments) => {
+    const filmComments = [];
+
+    film.comments.forEach((commentId) => {
+      const filmComment = comments.find((item) => item.id === commentId);
+      filmComments.push(filmComment);
+    });
+
+    return filmComments;
+  };
 
   setDeleteButtonClickHandler = (callback) => {
     this._callback.deleteClick = callback;

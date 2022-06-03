@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 
 const Amount = {
   FILMS: 22,
-  COMMENTS: 220
+  COMMENTS: 50
 };
 
 const NumberFilmComments = {
@@ -119,7 +119,7 @@ const generateDate = () => {
 
 const generateFilm = () => ({
   id: generateFilmsId(),
-  commentsId: generateCommentsIdToFilm(),
+  comments: generateCommentsIdToFilm(),
   filmInfo: {
     title: generateTitle(),
     alternativeTitle: 'Laziness Who Sold Themselves',

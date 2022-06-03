@@ -161,7 +161,7 @@ export default class MainPresenter {
 
     for (const renderedFilmId of renderedFilmsIndificators) {
       if (renderedFilmId === newFilm.id) {
-        filmPresenter.get(newFilm.id).init(newFilm, this.comments[newFilm.id - 1]);
+        filmPresenter.get(newFilm.id).init(newFilm, this.comments);
       }
     }
   };
@@ -172,7 +172,7 @@ export default class MainPresenter {
     this.#changeFilm(updatedFilm, this.#filmPresenterSecondExtra);
 
     if (this.popupPresenter.get(updatedFilm.id)) {
-      this.popupPresenter.get(updatedFilm.id).init(updatedFilm, this.comments[updatedFilm.id - 1]);
+      this.popupPresenter.get(updatedFilm.id).init(updatedFilm, this.comments);
     }
   };
 
@@ -206,7 +206,7 @@ export default class MainPresenter {
     }
 
     if (updateSecondExtra) {
-      if (this.sourceFilms.find((item) => item.commentsId.length > 0)) {
+      if (this.sourceFilms.find((item) => item.comments.length > 0)) {
         if (this.#extraSectionStatus.SECOND_RENDERED) {
           this.#clearExtraFilmsList(this.#filmPresenterSecondExtra);
 
@@ -231,12 +231,10 @@ export default class MainPresenter {
       container,
       this.#handleViewAction,
       this.popupPresenter,
-      this.popupComponent,
-      this.comments
+      this.popupComponent
     );
-    const filmComments = this.comments[filmData.id - 1];
 
-    filmPresenter.init(filmData, filmComments);
+    filmPresenter.init(filmData, this.comments);
 
     switch (container) {
       case this.#filmsListContainerComponent.element:
@@ -286,7 +284,7 @@ export default class MainPresenter {
       }
     }
 
-    if (second && this.sourceFilms.find((item) => item.commentsId.length > 0)) {
+    if (second && this.sourceFilms.find((item) => item.comments.length > 0)) {
       render(this.#secondExtraSectionComponent, this.#filmsSectionComponent.element);
       render(this.#secondExtraFilmsContainerComponent, this.#secondExtraSectionComponent.element);
 
