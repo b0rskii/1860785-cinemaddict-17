@@ -1,71 +1,43 @@
 import Observable from '../framework/observable.js';
-import {Amount, generateComment} from '../fish/film.js';
 
 export default class CommentsModel extends Observable {
-  #comments = Array.from({length: Amount.COMMENTS}, generateComment);
-  #matchedComments = [];
+  #commentsApiService = null;
+  #comments = [];
 
-  #films = [];
-
-  constructor (films) {
+  constructor (commentsApiService) {
     super();
-    this.#films = films;
-    this.#matchedComments = this.#matchCommentsWithFilms();
+    this.#commentsApiService = commentsApiService;
   }
 
-  get comments() {
-    return this.#matchedComments;
-  }
-
-  #matchCommentsWithFilms() {
-    const matchedComments = [];
-
-    this.#films.forEach((item) => {
-      const filmComments = [];
-
-      for (let i = 0; i < item.commentsId.length; i++) {
-        const filmComment = this.#comments.find((comment) => comment.id === item.commentsId[i]);
-        filmComments.push(filmComment);
-      }
-
-      matchedComments.push(filmComments);
-    });
-
-    return matchedComments;
-  }
+  getFilmComments = async (filmId) => {
+    try {
+      this.#comments = await this.#commentsApiService.getFilmComments(filmId);
+      return [...this.#comments];
+    } catch {
+      return [];
+    }
+  };
 
   addComment = (updateType, update) => {
-    const updatedComments = [];
-
-    this.#matchedComments.forEach((item, i) => {
-      if (item.length !== this.#films[i].commentsId.length) {
-        item.push(update);
-        updatedComments.push(item);
-      } else {
-        updatedComments.push(item);
-      }
-    });
-
-    this.#matchedComments = updatedComments;
+    this.#comments = [
+      update,
+      ...this.#comments
+    ];
 
     this._notify(updateType, update);
   };
 
   deleteComment = (updateType, update) => {
-    const updatedComments = [];
+    const index = this.#comments.findIndex((item) => item.id === update.id);
 
-    for (let arr of this.#matchedComments) {
-      if (arr.find((item) => item === update)) {
-        const index = arr.findIndex((item) => item === update);
-
-        arr = [...arr.slice(0, index), ...arr.slice(index + 1)];
-        updatedComments.push(arr);
-      } else {
-        updatedComments.push(arr);
-      }
+    if (index === -1) {
+      throw new Error('Can\'t delete unexisting film');
     }
 
-    this.#matchedComments = updatedComments;
+    this.#comments = [
+      ...this.#comments.slice(0, index),
+      ...this.#comments.slice(index + 1)
+    ];
 
     this._notify(updateType, update);
   };

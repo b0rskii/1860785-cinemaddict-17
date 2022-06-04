@@ -24,20 +24,20 @@ const createCommentsTemplate = (comments) => {
 };
 
 export default class PopupCommentsView extends AbstractView {
-  #comments = [];
+  #filmComments = [];
   #commentCount = null;
 
-  constructor (comments) {
+  constructor (filmComments) {
     super();
-    this.#comments = comments;
-    this.#commentCount = this.#comments.length;
+    this.#filmComments = filmComments;
+    this.#commentCount = this.#filmComments.length;
   }
 
   get template() {
     return  `<div>
               <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${this.#commentCount}</span></h3>
               <ul class="film-details__comments-list">
-                ${createCommentsTemplate(this.#comments)}
+                ${createCommentsTemplate(this.#filmComments)}
               </ul>
             </div>`;
   }

@@ -5,13 +5,9 @@ import dayjs from 'dayjs';
 import he from 'he';
 
 export default class PopupNewCommentView extends AbstractStatefulView {
-  #comments = [];
-  #newCommentId = null;
-
-  constructor (film, comments) {
+  constructor (film) {
     super();
     this._state = this.#convertFilmToState(film);
-    this.#comments = comments;
 
     this.#setInnerHandlers();
   }
@@ -95,10 +91,7 @@ export default class PopupNewCommentView extends AbstractStatefulView {
 
   #formSubmitHandler = (evt) => {
     if (evt.key === 'Enter' && evt.ctrlKey === true && this._state.emotion !== '') {
-      this.#newCommentId = this.#comments.reduce((sum, item) => sum + item.length, 0) + 1;
-
       const newComment = {
-        id: this.#newCommentId,
         author: 'Ilya O\'Reilly',
         comment: he.encode(this._state.comment),
         date: dayjs().toDate(),

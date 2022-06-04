@@ -12,23 +12,22 @@ export default class FilmPresenter {
   #container = null;
 
   #film = null;
-  #filmComments = null;
+  #comments = null;
   #filmComponent = null;
 
   #filmStatus = Film.NOT_RENDERED;
   #changeData = null;
 
-  constructor (container, changeData, popupPresenter, popupComponent, comments) {
+  constructor (container, changeData, popupPresenter, popupComponent) {
     this.#container = container;
     this.#changeData = changeData;
     this.popupPresenter = popupPresenter;
     this.popupComponent = popupComponent;
-    this.comments = comments;
   }
 
-  init = (film, filmComments) => {
+  init = (film, comments) => {
     this.#film = film;
-    this.#filmComments = filmComments;
+    this.#comments = comments;
 
     const prevFilmComponent = this.#filmComponent;
 
@@ -66,7 +65,7 @@ export default class FilmPresenter {
 
     if (!this.popupPresenter.has(this.#film.id)) {
       const newPopupPresenter = new PopupPresenter(this.#changeData, this.popupPresenter, this.popupComponent);
-      newPopupPresenter.init(this.#film, this.#filmComments, this.comments);
+      newPopupPresenter.init(this.#film, this.#comments);
 
       this.popupPresenter.set(this.#film.id, newPopupPresenter);
     }

@@ -7,7 +7,6 @@ const DESCRIPTION_MAX_LENGTH = 140;
 const RELEASE_DATE_FORMAT = 'YYYY';
 
 export default class FilmCardView extends AbstractView{
-  #filmId = null;
   #title = null;
   #totalRating = null;
   #poster = null;
@@ -22,14 +21,13 @@ export default class FilmCardView extends AbstractView{
 
   constructor (film) {
     super();
-    this.#filmId = film.id;
     this.#title = film.filmInfo.title;
     this.#totalRating = film.filmInfo.totalRating;
     this.#poster = film.filmInfo.poster;
     this.#description = film.filmInfo.description;
     this.#runtime = film.filmInfo.runtime;
     this.#releaseDate = film.filmInfo.release.date;
-    this.#comments = film.commentsId;
+    this.#comments = film.comments;
     this.#genre = film.filmInfo.genre;
     this.#isWatchlistFilm = film.userDetails.watchlist;
     this.#isWatchedFilm = film.userDetails.alreadyWatched;
@@ -37,7 +35,7 @@ export default class FilmCardView extends AbstractView{
   }
 
   get template() {
-    return `<article class="film-card" data-id="${this.#filmId}">
+    return `<article class="film-card">
               <a class="film-card__link">
                 <h3 class="film-card__title">${this.#title}</h3>
                 <p class="film-card__rating">${this.#totalRating}</p>

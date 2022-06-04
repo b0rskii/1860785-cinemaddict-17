@@ -13,7 +13,7 @@ const Popup = {
 
 export default class PopupPresenter {
   #film = null;
-  #filmComments = [];
+  #comments = [];
 
   #popupComponent = null;
   #popupPresenter = null;
@@ -32,9 +32,9 @@ export default class PopupPresenter {
     this.#prevPopupComponent = prevPopupComponent;
   }
 
-  init = (film, filmComments, comments) => {
+  init = async (film, comments) => {
     this.#film = film;
-    this.#filmComments = filmComments;
+    this.#comments = await comments(film.id);
 
     const prevControlsComponent = this.#controlsComponent;
     const prevCommentsComponent = this.#commentsComponent;
@@ -42,8 +42,8 @@ export default class PopupPresenter {
     this.#popupComponent = new PopupView(film);
     this.#popupContainer = this.#popupComponent.container;
     this.#controlsComponent = new PopupControlsView(film);
-    this.#commentsComponent = new PopupCommentsView(filmComments);
-    this.#newCommentComponent = new PopupNewCommentView(film, comments);
+    this.#commentsComponent = new PopupCommentsView(this.#comments);
+    this.#newCommentComponent = new PopupNewCommentView(film);
 
     if (this.#prevPopupComponent.size === 0) {
       this.#renderPopup();
@@ -131,15 +131,15 @@ export default class PopupPresenter {
   };
 
   #onCommentDeleteButtonClick = (commentId) => {
-    const comment = this.#filmComments.find((item) => item.id === Number(commentId));
-    this.#film.commentsId = this.#film.commentsId.filter((item) => item !== Number(commentId));
+    const comment = this.#comments.find((item) => item.id === Number(commentId));
+    this.#film.comments = this.#film.comments.filter((item) => item !== Number(commentId));
 
     this.#changeData(UserAction.DELETE_COMMENT, UpdateType.PATCH, comment);
     this.#changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
   };
 
   #onFormSubmit = (newComment) => {
-    this.#film.commentsId.push(newComment.id);
+    this.#film.comments.push(newComment.id);
 
     this.#changeData(UserAction.UPDATE_FILM, UpdateType.PATCH, this.#film);
     this.#changeData(UserAction.ADD_COMMENT, UpdateType.PATCH, newComment);
