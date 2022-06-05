@@ -31,14 +31,14 @@ export default class CommentsModel extends Observable {
   };
 
   deleteComment = async (updateType, update) => {
-    const index = this.#comments.findIndex((item) => item.id === update.id);
+    const index = this.#comments.findIndex((item) => item.id === update.comment.id);
 
     if (index === -1) {
       throw new Error('Can\'t delete unexisting film');
     }
 
     try {
-      await this.#commentsApiService.deleteComment(update);
+      await this.#commentsApiService.deleteComment(update.comment);
       this.#comments = [
         ...this.#comments.slice(0, index),
         ...this.#comments.slice(index + 1)

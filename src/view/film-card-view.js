@@ -1,4 +1,4 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import {formatDescription, formatRuntime, formatDate} from '../utils/film.js';
 import {addClassByCondition} from '../utils/common.js';
 import {ActiveClass} from '../const.js';
@@ -6,7 +6,7 @@ import {ActiveClass} from '../const.js';
 const DESCRIPTION_MAX_LENGTH = 140;
 const RELEASE_DATE_FORMAT = 'YYYY';
 
-export default class FilmCardView extends AbstractView{
+export default class FilmCardView extends AbstractStatefulView{
   #title = null;
   #totalRating = null;
   #poster = null;
@@ -21,17 +21,18 @@ export default class FilmCardView extends AbstractView{
 
   constructor (film) {
     super();
-    this.#title = film.filmInfo.title;
-    this.#totalRating = film.filmInfo.totalRating;
-    this.#poster = film.filmInfo.poster;
-    this.#description = film.filmInfo.description;
-    this.#runtime = film.filmInfo.runtime;
-    this.#releaseDate = film.filmInfo.release.date;
-    this.#comments = film.comments;
-    this.#genre = film.filmInfo.genre;
-    this.#isWatchlistFilm = film.userDetails.watchlist;
-    this.#isWatchedFilm = film.userDetails.alreadyWatched;
-    this.#isFavoriteFilm = film.userDetails.favorite;
+    this._state = this.#convertDataToState(film);
+    this.#title = this._state.filmInfo.title;
+    this.#totalRating = this._state.filmInfo.totalRating;
+    this.#poster = this._state.filmInfo.poster;
+    this.#description = this._state.filmInfo.description;
+    this.#runtime = this._state.filmInfo.runtime;
+    this.#releaseDate = this._state.filmInfo.release.date;
+    this.#comments = this._state.comments;
+    this.#genre = this._state.filmInfo.genre;
+    this.#isWatchlistFilm = this._state.userDetails.watchlist;
+    this.#isWatchedFilm = this._state.userDetails.alreadyWatched;
+    this.#isFavoriteFilm = this._state.userDetails.favorite;
   }
 
   get template() {
@@ -49,12 +50,16 @@ export default class FilmCardView extends AbstractView{
                 <span class="film-card__comments">${this.#comments.length} comments</span>
               </a>
               <div class="film-card__controls">
-                <button class="film-card__controls-item film-card__controls-item--add-to-watchlist ${addClassByCondition(this.#isWatchlistFilm, ActiveClass.FILM_CARD_CONTROL)}" type="button">Add to watchlist</button>
-                <button class="film-card__controls-item film-card__controls-item--mark-as-watched ${addClassByCondition(this.#isWatchedFilm, ActiveClass.FILM_CARD_CONTROL)}" type="button">Mark as watched</button>
-                <button class="film-card__controls-item film-card__controls-item--favorite ${addClassByCondition(this.#isFavoriteFilm, ActiveClass.FILM_CARD_CONTROL)}" type="button">Mark as favorite</button>
+                <button ${this._state.isDisabled ? 'disabled' : ''} class="film-card__controls-item film-card__controls-item--add-to-watchlist ${addClassByCondition(this.#isWatchlistFilm, ActiveClass.FILM_CARD_CONTROL)}" type="button">Add to watchlist</button>
+                <button ${this._state.isDisabled ? 'disabled' : ''} class="film-card__controls-item film-card__controls-item--mark-as-watched ${addClassByCondition(this.#isWatchedFilm, ActiveClass.FILM_CARD_CONTROL)}" type="button">Mark as watched</button>
+                <button ${this._state.isDisabled ? 'disabled' : ''} class="film-card__controls-item film-card__controls-item--favorite ${addClassByCondition(this.#isFavoriteFilm, ActiveClass.FILM_CARD_CONTROL)}" type="button">Mark as favorite</button>
               </div>
             </article>`;
   }
+
+  #convertDataToState = (data) => ({...data,
+    isDisabled: false
+  });
 
   setClickHandler = (callback) => {
     this._callback.click = callback;
@@ -92,5 +97,12 @@ export default class FilmCardView extends AbstractView{
 
   #favoriteClickHandler = () => {
     this._callback.favoriteClick();
+  };
+
+  _restoreHandlers = () => {
+    this.setClickHandler(this._callback.click);
+    this.setWatchlistClickHandler(this._callback.watchlistClick);
+    this.setWatchedClickHandler(this._callback.watchedClick);
+    this.setFavoriteClickHandler(this._callback.favoriteClick);
   };
 }

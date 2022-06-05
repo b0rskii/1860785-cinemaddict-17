@@ -12,22 +12,22 @@ export default class FilmPresenter {
   #container = null;
 
   #film = null;
-  #comments = null;
+  #getFilmComments = null;
   #filmComponent = null;
 
   #filmStatus = Film.NOT_RENDERED;
-  #changeData = null;
+  #handleViewAction = null;
 
-  constructor (container, changeData, popupPresenter, popupComponent) {
+  constructor (container, handleViewAction, popupPresenter, popupComponent) {
     this.#container = container;
-    this.#changeData = changeData;
+    this.#handleViewAction = handleViewAction;
     this.popupPresenter = popupPresenter;
     this.popupComponent = popupComponent;
   }
 
-  init = (film, comments) => {
+  init = (film, getFilmComments) => {
     this.#film = film;
-    this.#comments = comments;
+    this.#getFilmComments = getFilmComments;
 
     const prevFilmComponent = this.#filmComponent;
 
@@ -55,6 +55,22 @@ export default class FilmPresenter {
     remove(this.#filmComponent);
   };
 
+  setSaving = () => {
+    this.#filmComponent.updateElement({
+      isDisabled: true
+    });
+  };
+
+  setAborting = () => {
+    const resetFilmState = () => {
+      this.#filmComponent.updateElement({
+        isDisabled: false
+      });
+    };
+
+    this.#filmComponent.shake(resetFilmState);
+  };
+
   #onFilmCardClick = () => {
     if (this.popupPresenter.size > 0 && !this.popupPresenter.has(this.#film.id)) {
       this.popupPresenter.forEach((item) => item.destroy());
@@ -64,8 +80,8 @@ export default class FilmPresenter {
     }
 
     if (!this.popupPresenter.has(this.#film.id)) {
-      const newPopupPresenter = new PopupPresenter(this.#changeData, this.popupPresenter, this.popupComponent);
-      newPopupPresenter.init(this.#film, this.#comments);
+      const newPopupPresenter = new PopupPresenter(this.#handleViewAction, this.popupPresenter, this.popupComponent);
+      newPopupPresenter.init(this.#film, this.#getFilmComments);
 
       this.popupPresenter.set(this.#film.id, newPopupPresenter);
     }
@@ -73,16 +89,16 @@ export default class FilmPresenter {
 
   #onWatchlistControlClick = () => {
     this.#film.userDetails.watchlist = !(this.#film.userDetails.watchlist);
-    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MAJOR, this.#film);
+    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.MAJOR, this.#film);
   };
 
   #onWatchedControlClick = () => {
     this.#film.userDetails.alreadyWatched = !(this.#film.userDetails.alreadyWatched);
-    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MAJOR, this.#film);
+    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.MAJOR, this.#film);
   };
 
   #onFavoriteControlClick = () => {
     this.#film.userDetails.favorite = !(this.#film.userDetails.favorite);
-    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MAJOR, this.#film);
+    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.MAJOR, this.#film);
   };
 }

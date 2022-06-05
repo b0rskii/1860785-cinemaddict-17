@@ -24,20 +24,21 @@ export default class PopupPresenter {
   #newCommentComponent = null;
 
   #popupStatus = Popup.NOT_RENDERED;
-  #changeData = null;
+  #handleViewAction = null;
 
-  constructor (changeData, popupPresenter, prevPopupComponent) {
-    this.#changeData = changeData;
+  constructor (handleViewAction, popupPresenter, prevPopupComponent) {
+    this.#handleViewAction = handleViewAction;
     this.#popupPresenter = popupPresenter;
     this.#prevPopupComponent = prevPopupComponent;
   }
 
-  init = async (film, comments) => {
+  init = async (film, getFilmComments) => {
     this.#film = film;
-    this.#comments = await comments(film.id);
+    this.#comments = await getFilmComments(film.id);
 
     const prevControlsComponent = this.#controlsComponent;
     const prevCommentsComponent = this.#commentsComponent;
+    const prevNewCommentComponent = this.#newCommentComponent;
 
     this.#popupComponent = new PopupView(film);
     this.#popupContainer = this.#popupComponent.container;
@@ -55,16 +56,74 @@ export default class PopupPresenter {
     if (this.#popupStatus === Popup.RENDERED) {
       replace(this.#controlsComponent, prevControlsComponent);
       replace(this.#commentsComponent, prevCommentsComponent);
+      replace(this.#newCommentComponent, prevNewCommentComponent);
       this.#setPopupHandlers();
     }
 
     remove(prevControlsComponent);
     remove(prevCommentsComponent);
+    remove(prevNewCommentComponent);
   };
 
   destroy = () => {
     remove(this.#popupComponent);
     document.removeEventListener('keydown', this.#onPopupEscapeKeydown);
+  };
+
+  setSaving = (actionType) => {
+    switch (actionType) {
+      case UserAction.ADD_COMMENT:
+        this.#newCommentComponent.updateElement({
+          emotion: '',
+          comment: '',
+          isDisabled: true
+        });
+        break;
+      case UserAction.UPDATE_FILM_POPUP:
+        this.#controlsComponent.updateElement({
+          isDisabled: true
+        });
+        break;
+    }
+  };
+
+  setDeleting = (comment) => {
+    this.#commentsComponent.updateElement({
+      deletingCommentId: comment.id
+    });
+  };
+
+  setAborting = (actionType) => {
+    if (actionType === UserAction.UPDATE_FILM_POPUP) {
+      const resetControlsState = () => {
+        this.#controlsComponent.updateElement({
+          isDisabled: false
+        });
+      };
+
+      this.#controlsComponent.shake(resetControlsState);
+    }
+    if (actionType === UserAction.ADD_COMMENT) {
+      const resetFormState = () => {
+        this.#newCommentComponent.updateElement({
+          emotion: '',
+          comment: '',
+          isDisabled: false
+        });
+      };
+
+      this.#newCommentComponent.shake(resetFormState);
+    }
+
+    if (actionType === UserAction.DELETE_COMMENT) {
+      const resetCommentsState = () => {
+        this.#commentsComponent.updateElement({
+          deletingCommentId: ''
+        });
+      };
+
+      this.#commentsComponent.shake(resetCommentsState);
+    }
   };
 
   #setPopupHandlers = () => {
@@ -73,6 +132,7 @@ export default class PopupPresenter {
     this.#controlsComponent.setWatchedClickHandler(this.#onPopupWatchedControlClick);
     this.#controlsComponent.setFavoriteClickHandler(this.#onPopupFavoriteControlClick);
     this.#commentsComponent.setDeleteButtonClickHandler(this.#onCommentDeleteButtonClick);
+    this.#newCommentComponent.setFormSubmitHandler(this.#onFormSubmit);
   };
 
   #renderPopup = () => {
@@ -83,11 +143,8 @@ export default class PopupPresenter {
     render(this.#commentsComponent, this.#popupComponent.commentsContainer);
     render(this.#newCommentComponent, this.#popupComponent.commentsContainer);
 
-    this.#newCommentComponent.setFormSubmitHandler(this.#onFormSubmit);
-    this.#popupComponent.bodyAddHideOverflow();
-
     this.#setPopupHandlers();
-
+    this.#popupComponent.bodyAddHideOverflow();
     this.#popupStatus = Popup.RENDERED;
 
     document.addEventListener('keydown', this.#onPopupEscapeKeydown);
@@ -117,30 +174,31 @@ export default class PopupPresenter {
 
   #onPopupWatchlistControlClick = () => {
     this.#film.userDetails.watchlist = !(this.#film.userDetails.watchlist);
-    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MAJOR, this.#film);
+    this.#handleViewAction(UserAction.UPDATE_FILM_POPUP, UpdateType.MAJOR, this.#film);
   };
 
   #onPopupWatchedControlClick = () => {
     this.#film.userDetails.alreadyWatched = !(this.#film.userDetails.alreadyWatched);
-    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MAJOR, this.#film);
+    this.#handleViewAction(UserAction.UPDATE_FILM_POPUP, UpdateType.MAJOR, this.#film);
   };
 
   #onPopupFavoriteControlClick = () => {
     this.#film.userDetails.favorite = !(this.#film.userDetails.favorite);
-    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MAJOR, this.#film);
+    this.#handleViewAction(UserAction.UPDATE_FILM_POPUP, UpdateType.MAJOR, this.#film);
   };
 
   #onCommentDeleteButtonClick = async (commentId) => {
+    const film = this.#film;
     const comment = this.#comments.find((item) => item.id === commentId);
 
-    await this.#changeData(UserAction.DELETE_COMMENT, UpdateType.PATCH, comment);
-    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
+    await this.#handleViewAction(UserAction.DELETE_COMMENT, UpdateType.PATCH, {film, comment});
+    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
   };
 
   #onFormSubmit = async (newComment) => {
     const film = this.#film;
 
-    await this.#changeData(UserAction.ADD_COMMENT, UpdateType.PATCH, {film, newComment});
-    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
+    await this.#handleViewAction(UserAction.ADD_COMMENT, UpdateType.PATCH, {film, newComment});
+    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
   };
 }
