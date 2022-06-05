@@ -130,19 +130,17 @@ export default class PopupPresenter {
     this.#changeData(UserAction.UPDATE_FILM, UpdateType.MAJOR, this.#film);
   };
 
-  #onCommentDeleteButtonClick = (commentId) => {
-    const comment = this.#comments.find((item) => item.id === Number(commentId));
-    this.#film.comments = this.#film.comments.filter((item) => item !== Number(commentId));
+  #onCommentDeleteButtonClick = async (commentId) => {
+    const comment = this.#comments.find((item) => item.id === commentId);
 
-    this.#changeData(UserAction.DELETE_COMMENT, UpdateType.PATCH, comment);
+    await this.#changeData(UserAction.DELETE_COMMENT, UpdateType.PATCH, comment);
     this.#changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
   };
 
-  #onFormSubmit = (newComment) => {
-    this.#film.comments.push(newComment.id);
+  #onFormSubmit = async (newComment) => {
+    const film = this.#film;
 
-    this.#changeData(UserAction.UPDATE_FILM, UpdateType.PATCH, this.#film);
-    this.#changeData(UserAction.ADD_COMMENT, UpdateType.PATCH, newComment);
+    await this.#changeData(UserAction.ADD_COMMENT, UpdateType.PATCH, {film, newComment});
     this.#changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
   };
 }

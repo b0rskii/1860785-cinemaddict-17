@@ -59,4 +59,11 @@ const UpdateType = {
   MAJOR: 'MAJOR'
 };
 
-export {FilterType, ActiveClass, SortType, UserRank, Emoji, UserAction, UpdateType};
+const Method = {
+  GET: 'GET',
+  PUT: 'PUT',
+  DELETE: 'DELETE',
+  POST: 'POST'
+};
+
+export {FilterType, ActiveClass, SortType, UserRank, Emoji, UserAction, UpdateType, Method};
