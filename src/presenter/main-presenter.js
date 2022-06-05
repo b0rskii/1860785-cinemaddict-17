@@ -182,7 +182,7 @@ export default class MainPresenter {
 
     for (const renderedFilmId of renderedFilmsIndificators) {
       if (renderedFilmId === newFilm.id) {
-        filmPresenter.get(newFilm.id).init(newFilm, this.getFilmComments(newFilm.id));
+        filmPresenter.get(newFilm.id).init(newFilm, this.getFilmComments);
       }
     }
   };
@@ -193,7 +193,7 @@ export default class MainPresenter {
     this.#changeFilm(updatedFilm, this.#filmPresenterSecondExtra);
 
     if (this.popupPresenter.get(updatedFilm.id)) {
-      this.popupPresenter.get(updatedFilm.id).init(updatedFilm, this.getFilmComments(updatedFilm.id));
+      this.popupPresenter.get(updatedFilm.id).init(updatedFilm, this.getFilmComments);
     }
   };
 

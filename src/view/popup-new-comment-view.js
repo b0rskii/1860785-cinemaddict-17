@@ -90,7 +90,7 @@ export default class PopupNewCommentView extends AbstractStatefulView {
   };
 
   #formSubmitHandler = (evt) => {
-    if (evt.key === 'Enter' && evt.ctrlKey === true && this._state.emotion !== '') {
+    if (evt.key === 'Enter' && (evt.ctrlKey || evt.metaKey) && this._state.emotion !== '') {
       const newComment = {
         author: 'Ilya O\'Reilly',
         comment: he.encode(this._state.comment),
