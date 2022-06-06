@@ -213,14 +213,12 @@ export default class PopupPresenter {
     const film = this.#film;
     const comment = this.#comments.find((item) => item.id === commentId);
 
-    await this.#handleViewAction(UserAction.DELETE_COMMENT, UpdateType.PATCH, {film, comment});
-    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
+    await this.#handleViewAction(UserAction.DELETE_COMMENT, UpdateType.MINOR, {film, comment});
   };
 
   #onFormSubmit = async (newComment) => {
     const film = this.#film;
 
-    await this.#handleViewAction(UserAction.ADD_COMMENT, UpdateType.PATCH, {film, newComment});
-    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
+    await this.#handleViewAction(UserAction.ADD_COMMENT, UpdateType.MINOR, {film, newComment});
   };
 }

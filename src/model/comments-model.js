@@ -24,7 +24,7 @@ export default class CommentsModel extends Observable {
       const updatedComments = response.comments;
 
       this.#comments = updatedComments;
-      this._notify(updateType, update);
+      this._notify(updateType, update.film);
     } catch {
       throw new Error('Can\'t add comment');
     }
@@ -43,7 +43,7 @@ export default class CommentsModel extends Observable {
         ...this.#comments.slice(0, index),
         ...this.#comments.slice(index + 1)
       ];
-      this._notify(updateType, update);
+      this._notify(updateType, update.film);
     } catch {
       throw new Error('Can\'t delete comment');
     }

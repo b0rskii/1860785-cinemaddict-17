@@ -69,6 +69,7 @@ export default class MainPresenter {
     this.popupComponent = new Map();
 
     this.#filmsModel.addObserver(this.#handleModelEvent);
+    this.#commentsModel.addObserver(this.#handleModelEvent);
   }
 
   get sourceFilms() {
@@ -152,7 +153,7 @@ export default class MainPresenter {
 
     switch (actionType) {
       case UserAction.UPDATE_FILM:
-        this.#filmPresenter.get(update.id).setSaving(actionType);
+        this.#filmPresenter.get(update.id).setSaving();
         try {
           await this.#filmsModel.updateFilm(updateType, update);
         } catch {
@@ -170,9 +171,10 @@ export default class MainPresenter {
         break;
 
       case UserAction.ADD_COMMENT:
-        this.popupPresenter.get(update.film.id).setSaving();
+        this.popupPresenter.get(update.film.id).setSaving(actionType);
         try {
           await this.#commentsModel.addComment(updateType, update);
+          this.#filmsModel.updateFilm(updateType, update.film);
         } catch {
           this.popupPresenter.get(update.film.id).setAborting(actionType);
         }
@@ -182,6 +184,7 @@ export default class MainPresenter {
         this.popupPresenter.get(update.film.id).setDeleting(update.comment);
         try {
           await this.#commentsModel.deleteComment(updateType, update);
+          this.#filmsModel.updateFilm(updateType, update.film);
         } catch {
           this.popupPresenter.get(update.film.id).setAborting(actionType);
         }
