@@ -14,7 +14,7 @@ export default class CommentsModel extends Observable {
       this.#comments = await this.#commentsApiService.getFilmComments(filmId);
       return [...this.#comments];
     } catch {
-      return [];
+      return null;
     }
   };
 

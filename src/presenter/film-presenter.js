@@ -80,8 +80,8 @@ export default class FilmPresenter {
     }
 
     if (!this.popupPresenter.has(this.#film.id)) {
-      const newPopupPresenter = new PopupPresenter(this.#handleViewAction, this.popupPresenter, this.popupComponent);
-      newPopupPresenter.init(this.#film, this.#getFilmComments);
+      const newPopupPresenter = new PopupPresenter(this.#handleViewAction, this.popupPresenter, this.popupComponent, this.#getFilmComments);
+      newPopupPresenter.init(this.#film);
 
       this.popupPresenter.set(this.#film.id, newPopupPresenter);
     }

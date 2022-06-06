@@ -135,6 +135,8 @@ export default class PopupView extends AbstractView {
     return this.element.querySelector('.film-details__comments-wrap');
   }
 
+  checkCommentsRenderStatus = () => document.querySelector('.film-details__comments-list');
+
   bodyAddHideOverflow = () => {
     document.querySelector('body').classList.add('hide-overflow');
   };
