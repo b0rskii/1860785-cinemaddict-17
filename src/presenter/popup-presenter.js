@@ -195,18 +195,24 @@ export default class PopupPresenter {
   };
 
   #onPopupWatchlistControlClick = () => {
-    this.#film.userDetails.watchlist = !(this.#film.userDetails.watchlist);
-    this.#handleViewAction(UserAction.UPDATE_FILM_POPUP, UpdateType.MAJOR, this.#film);
+    const film = JSON.parse(JSON.stringify(this.#film));
+
+    film.userDetails.watchlist = !(film.userDetails.watchlist);
+    this.#handleViewAction(UserAction.UPDATE_FILM_POPUP, UpdateType.MAJOR, film);
   };
 
   #onPopupWatchedControlClick = () => {
-    this.#film.userDetails.alreadyWatched = !(this.#film.userDetails.alreadyWatched);
-    this.#handleViewAction(UserAction.UPDATE_FILM_POPUP, UpdateType.MAJOR, this.#film);
+    const film = JSON.parse(JSON.stringify(this.#film));
+
+    film.userDetails.alreadyWatched = !(film.userDetails.alreadyWatched);
+    this.#handleViewAction(UserAction.UPDATE_FILM_POPUP, UpdateType.MAJOR, film);
   };
 
   #onPopupFavoriteControlClick = () => {
-    this.#film.userDetails.favorite = !(this.#film.userDetails.favorite);
-    this.#handleViewAction(UserAction.UPDATE_FILM_POPUP, UpdateType.MAJOR, this.#film);
+    const film = JSON.parse(JSON.stringify(this.#film));
+
+    film.userDetails.favorite = !(film.userDetails.favorite);
+    this.#handleViewAction(UserAction.UPDATE_FILM_POPUP, UpdateType.MAJOR, film);
   };
 
   #onCommentDeleteButtonClick = async (commentId) => {
