@@ -1,13 +1,12 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import {Emoji} from '../const.js';
 import {checkReaction, isEmojiChecked} from '../utils/film.js';
-import dayjs from 'dayjs';
 import he from 'he';
 
 export default class PopupNewCommentView extends AbstractStatefulView {
   constructor (film) {
     super();
-    this._state = this.#convertFilmToState(film);
+    this._state = this.#convertDataToState(film);
 
     this.#setInnerHandlers();
   }
@@ -17,7 +16,7 @@ export default class PopupNewCommentView extends AbstractStatefulView {
               <div class="film-details__add-emoji-label">${checkReaction(this._state.emotion)}</div>
 
               <label class="film-details__comment-label">
-                <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${this._state.comment}</textarea>
+                <textarea ${this._state.isDisabled ? 'disabled' : ''} class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${this._state.comment}</textarea>
               </label>
 
               <div class="film-details__emoji-list">
@@ -44,9 +43,10 @@ export default class PopupNewCommentView extends AbstractStatefulView {
             </div>`;
   }
 
-  #convertFilmToState = (film) => ({...film,
+  #convertDataToState = (film) => ({...film,
     emotion: '',
-    comment: ''
+    comment: '',
+    isDisabled: false
   });
 
   #setInnerHandlers = () => {
@@ -89,25 +89,19 @@ export default class PopupNewCommentView extends AbstractStatefulView {
     this.element.closest('form').addEventListener('keydown', this.#formSubmitHandler);
   };
 
-  #formSubmitHandler = (evt) => {
-    if (evt.key === 'Enter' && evt.ctrlKey === true && this._state.emotion !== '') {
+  #formSubmitHandler = async (evt) => {
+    if (evt.key === 'Enter' && (evt.ctrlKey || evt.metaKey) && this._state.emotion !== '') {
       const newComment = {
-        author: 'Ilya O\'Reilly',
         comment: he.encode(this._state.comment),
-        date: dayjs().toDate(),
         emotion: this._state.emotion
       };
 
-      this._callback.formSubmit(newComment);
-
-      this.updateElement({
-        emotion: '',
-        comment: ''
-      });
+      await this._callback.formSubmit(newComment);
     }
   };
 
   _restoreHandlers = () => {
     this.#setInnerHandlers();
+    this.setFormSubmitHandler(this._callback.formSubmit);
   };
 }

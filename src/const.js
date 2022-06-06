@@ -47,7 +47,9 @@ const Emoji = {
 };
 
 const UserAction = {
+  GET_COMMENTS: 'GET_COMMENTS',
   UPDATE_FILM: 'UPDATE_FILM',
+  UPDATE_FILM_POPUP: 'UPDATE_FILM_POPUP',
   ADD_COMMENT: 'ADD_COMMENT',
   DELETE_COMMENT: 'DELETE_COMMENT'
 };
@@ -59,4 +61,11 @@ const UpdateType = {
   MAJOR: 'MAJOR'
 };
 
-export {FilterType, ActiveClass, SortType, UserRank, Emoji, UserAction, UpdateType};
+const Method = {
+  GET: 'GET',
+  PUT: 'PUT',
+  DELETE: 'DELETE',
+  POST: 'POST'
+};
+
+export {FilterType, ActiveClass, SortType, UserRank, Emoji, UserAction, UpdateType, Method};

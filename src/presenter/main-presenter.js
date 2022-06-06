@@ -8,6 +8,7 @@ import FilmsListSectionView from '../view/films-list-section-view.js';
 import FilmsListContainerView from '../view/films-list-container-view.js';
 import ShowMoreButtonView from '../view/show-more-button-view.js';
 import ExtraSectionView from '../view/extra-section-view.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 import {render, remove, replace} from '../framework/render.js';
 import {FilterType, SortType, UserAction, UpdateType} from '../const.js';
 import {filter} from '../utils/filter.js';
@@ -26,6 +27,11 @@ const ExtraSection = {
   SECOND_RENDERED: false
 };
 
+const TimeLimit = {
+  LOWER: 350,
+  UPPER: 1000
+};
+
 export default class MainPresenter {
   #container = null;
   #filmsModel = null;
@@ -34,6 +40,7 @@ export default class MainPresenter {
   #filmPresenter = new Map();
   #filmPresenterFirstExtra = new Map();
   #filmPresenterSecondExtra = new Map();
+  #uiBlocker = new UiBlocker(TimeLimit.LOWER, TimeLimit.UPPER);
   #currentSortType = SortType.DEFAULT;
   #currentFilterType = FilterType.ALL;
   #extraSectionStatus = ExtraSection;
@@ -62,6 +69,7 @@ export default class MainPresenter {
     this.popupComponent = new Map();
 
     this.#filmsModel.addObserver(this.#handleModelEvent);
+    this.#commentsModel.addObserver(this.#handleModelEvent);
   }
 
   get sourceFilms() {
@@ -140,18 +148,50 @@ export default class MainPresenter {
     render(this.#noFilmsComponent, this.#filmsSectionComponent.element);
   };
 
-  #handleViewAction = (actionType, updateType, update) => {
+  #handleViewAction = async (actionType, updateType, update) => {
+    this.#uiBlocker.block();
+
     switch (actionType) {
       case UserAction.UPDATE_FILM:
-        this.#filmsModel.updateFilm(updateType, update);
+        this.#filmPresenter.get(update.id).setSaving();
+        try {
+          await this.#filmsModel.updateFilm(updateType, update);
+        } catch {
+          this.#filmPresenter.get(update.id).setAborting();
+        }
         break;
+
+      case UserAction.UPDATE_FILM_POPUP:
+        this.popupPresenter.get(update.id).setSaving(actionType);
+        try {
+          await this.#filmsModel.updateFilm(updateType, update);
+        } catch {
+          this.popupPresenter.get(update.id).setAborting(actionType);
+        }
+        break;
+
       case UserAction.ADD_COMMENT:
-        this.#commentsModel.addComment(updateType, update);
+        this.popupPresenter.get(update.film.id).setSaving(actionType);
+        try {
+          await this.#commentsModel.addComment(updateType, update);
+          this.#filmsModel.updateFilm(updateType, update.film);
+        } catch {
+          this.popupPresenter.get(update.film.id).setAborting(actionType);
+        }
         break;
+
       case UserAction.DELETE_COMMENT:
-        this.#commentsModel.deleteComment(updateType, update);
+        this.popupPresenter.get(update.film.id).setDeleting(update.comment);
+        try {
+          await this.#commentsModel.deleteComment(updateType, update);
+          this.#filmsModel.updateFilm(updateType, update.film);
+        } catch {
+          this.popupPresenter.get(update.film.id).setAborting(actionType);
+        }
         break;
     }
+
+    this.#uiBlocker.unblock();
   };
 
   #handleModelEvent = (updateType, data) => {
@@ -163,12 +203,15 @@ export default class MainPresenter {
         this.#renderInitialFilmsLists();
         this.#renderNavigation();
         break;
+
       case UpdateType.PATCH:
         break;
+
       case UpdateType.MINOR:
         this.#handleFilmChange(data);
         this.#updateFilmsList({updateSecondExtra: true});
         break;
+
       case UpdateType.MAJOR:
         this.#handleFilmChange(data);
         this.#updateFilmsList();
@@ -182,7 +225,7 @@ export default class MainPresenter {
 
     for (const renderedFilmId of renderedFilmsIndificators) {
       if (renderedFilmId === newFilm.id) {
-        filmPresenter.get(newFilm.id).init(newFilm, this.getFilmComments(newFilm.id));
+        filmPresenter.get(newFilm.id).init(newFilm, this.getFilmComments);
       }
     }
   };
@@ -193,7 +236,7 @@ export default class MainPresenter {
     this.#changeFilm(updatedFilm, this.#filmPresenterSecondExtra);
 
     if (this.popupPresenter.get(updatedFilm.id)) {
-      this.popupPresenter.get(updatedFilm.id).init(updatedFilm, this.getFilmComments(updatedFilm.id));
+      this.popupPresenter.get(updatedFilm.id).init(updatedFilm, this.getFilmComments);
     }
   };
 

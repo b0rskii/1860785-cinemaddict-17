@@ -1,10 +1,15 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import {formatDateFromNow} from '../utils/film.js';
 
-const createCommentsTemplate = (comments) => {
+const DeleteButtonText = {
+  DELETE: 'Delete',
+  DELETING: 'Deleting...'
+};
+
+const createCommentsTemplate = (state) => {
   const elements = [];
 
-  comments.forEach((item) => elements.push(
+  state.comments.forEach((item) => elements.push(
     `<li class="film-details__comment" data-id="${item.id}">
       <span class="film-details__comment-emoji">
         <img src="./images/emoji/${item.emotion}.png" width="55" height="55" alt="emoji-smile">
@@ -14,7 +19,7 @@ const createCommentsTemplate = (comments) => {
         <p class="film-details__comment-info">
           <span class="film-details__comment-author">${item.author}</span>
           <span class="film-details__comment-day">${formatDateFromNow(item.date)}</span>
-          <button class="film-details__comment-delete">Delete</button>
+          <button ${state.deletingCommentId === item.id ? 'disabled' : ''} class="film-details__comment-delete">${state.deletingCommentId === item.id ? DeleteButtonText.DELETING : DeleteButtonText.DELETE}</button>
         </p>
       </div>
     </li>`
@@ -23,24 +28,28 @@ const createCommentsTemplate = (comments) => {
   return elements.join('');
 };
 
-export default class PopupCommentsView extends AbstractView {
-  #filmComments = [];
+export default class PopupCommentsView extends AbstractStatefulView {
   #commentCount = null;
 
   constructor (filmComments) {
     super();
-    this.#filmComments = filmComments;
-    this.#commentCount = this.#filmComments.length;
+    this._state = this.#convertDataToState(filmComments);
+    this.#commentCount = this._state.comments.length;
   }
 
   get template() {
     return  `<div>
               <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${this.#commentCount}</span></h3>
               <ul class="film-details__comments-list">
-                ${createCommentsTemplate(this.#filmComments)}
+                ${createCommentsTemplate(this._state)}
               </ul>
             </div>`;
   }
+
+  #convertDataToState = (data) => ({
+    comments: [...data],
+    deletingCommentId: ''
+  });
 
   setDeleteButtonClickHandler = (callback) => {
     this._callback.deleteClick = callback;
@@ -51,7 +60,13 @@ export default class PopupCommentsView extends AbstractView {
     evt.preventDefault();
 
     if (evt.target.matches('button.film-details__comment-delete')) {
-      this._callback.deleteClick(evt.target.closest('li').dataset.id);
+      const commentId = evt.target.closest('li').dataset.id;
+
+      this._callback.deleteClick(commentId);
     }
+  };
+
+  _restoreHandlers = () => {
+    this.setDeleteButtonClickHandler(this._callback.deleteClick);
   };
 }

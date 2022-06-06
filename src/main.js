@@ -17,8 +17,11 @@ const footerStatistics = document.querySelector('.footer__statistics');
 const filmsModel = new FilmsModel(new FilmsApiService(END_POINT, AUTHORIZATION));
 const commentsModel = new CommentsModel(new CommentsApiService(END_POINT, AUTHORIZATION));
 
-new UserPresenter(header, filmsModel).init();
-new MainPresenter(main, filmsModel, commentsModel).init();
+const userPresenter = new UserPresenter(header, filmsModel);
+const mainPresenter = new MainPresenter(main, filmsModel, commentsModel);
+
+userPresenter.init();
+mainPresenter.init();
 
 render(new NumberOfFilmsView(filmsModel.films), footerStatistics);
 

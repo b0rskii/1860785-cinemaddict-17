@@ -2,8 +2,10 @@ import PopupView from '../view/popup-view.js';
 import PopupControlsView from '../view/popup-controls-view.js';
 import PopupCommentsView from '../view/popup-comments-view.js';
 import PopupNewCommentView from '../view/popup-new-comment-view.js';
+import ErrorCommentsView from '../view/error-comments-view.js';
 import {fixScrollbarOpen, fixScrollbarClose} from '../utils/common.js';
 import {render, remove, replace} from '../framework/render.js';
+import {RenderPosition} from '../framework/render.js';
 import {UserAction, UpdateType} from '../const.js';
 
 const Popup = {
@@ -22,27 +24,27 @@ export default class PopupPresenter {
   #controlsComponent = null;
   #commentsComponent = null;
   #newCommentComponent = null;
+  #getFilmComments = null;
 
   #popupStatus = Popup.NOT_RENDERED;
-  #changeData = null;
+  #handleViewAction = null;
 
-  constructor (changeData, popupPresenter, prevPopupComponent) {
-    this.#changeData = changeData;
+  constructor (handleViewAction, popupPresenter, prevPopupComponent, getFilmComments) {
+    this.#handleViewAction = handleViewAction;
     this.#popupPresenter = popupPresenter;
     this.#prevPopupComponent = prevPopupComponent;
+    this.#getFilmComments = getFilmComments;
   }
 
-  init = async (film, comments) => {
+  init = (film) => {
     this.#film = film;
-    this.#comments = await comments(film.id);
 
     const prevControlsComponent = this.#controlsComponent;
-    const prevCommentsComponent = this.#commentsComponent;
+    const prevNewCommentComponent = this.#newCommentComponent;
 
     this.#popupComponent = new PopupView(film);
     this.#popupContainer = this.#popupComponent.container;
     this.#controlsComponent = new PopupControlsView(film);
-    this.#commentsComponent = new PopupCommentsView(this.#comments);
     this.#newCommentComponent = new PopupNewCommentView(film);
 
     if (this.#prevPopupComponent.size === 0) {
@@ -54,12 +56,13 @@ export default class PopupPresenter {
 
     if (this.#popupStatus === Popup.RENDERED) {
       replace(this.#controlsComponent, prevControlsComponent);
-      replace(this.#commentsComponent, prevCommentsComponent);
+      replace(this.#newCommentComponent, prevNewCommentComponent);
+      this.#renderComments();
       this.#setPopupHandlers();
     }
 
     remove(prevControlsComponent);
-    remove(prevCommentsComponent);
+    remove(prevNewCommentComponent);
   };
 
   destroy = () => {
@@ -67,11 +70,89 @@ export default class PopupPresenter {
     document.removeEventListener('keydown', this.#onPopupEscapeKeydown);
   };
 
+  setSaving = (actionType) => {
+    switch (actionType) {
+      case UserAction.ADD_COMMENT:
+        this.#newCommentComponent.updateElement({
+          emotion: '',
+          comment: '',
+          isDisabled: true
+        });
+        break;
+      case UserAction.UPDATE_FILM_POPUP:
+        this.#controlsComponent.updateElement({
+          isDisabled: true
+        });
+        break;
+    }
+  };
+
+  setDeleting = (comment) => {
+    this.#commentsComponent.updateElement({
+      deletingCommentId: comment.id
+    });
+  };
+
+  setAborting = (actionType) => {
+    if (actionType === UserAction.UPDATE_FILM_POPUP) {
+      const resetControlsState = () => {
+        this.#controlsComponent.updateElement({
+          isDisabled: false
+        });
+      };
+
+      this.#controlsComponent.shake(resetControlsState);
+    }
+    if (actionType === UserAction.ADD_COMMENT) {
+      const resetFormState = () => {
+        this.#newCommentComponent.updateElement({
+          emotion: '',
+          comment: '',
+          isDisabled: false
+        });
+      };
+
+      this.#newCommentComponent.shake(resetFormState);
+    }
+
+    if (actionType === UserAction.DELETE_COMMENT) {
+      const resetCommentsState = () => {
+        this.#commentsComponent.updateElement({
+          deletingCommentId: ''
+        });
+      };
+
+      this.#commentsComponent.shake(resetCommentsState);
+    }
+  };
+
   #setPopupHandlers = () => {
     this.#popupComponent.setClickHandler(this.#closePopup);
     this.#controlsComponent.setWatchlistClickHandler(this.#onPopupWatchlistControlClick);
     this.#controlsComponent.setWatchedClickHandler(this.#onPopupWatchedControlClick);
     this.#controlsComponent.setFavoriteClickHandler(this.#onPopupFavoriteControlClick);
+    this.#newCommentComponent.setFormSubmitHandler(this.#onFormSubmit);
+  };
+
+  #renderComments = async () => {
+    this.#comments = await this.#getFilmComments(this.#film.id);
+
+    if (this.#comments === null) {
+      render(new ErrorCommentsView(), this.#popupComponent.commentsContainer, RenderPosition.AFTERBEGIN);
+      return;
+    }
+
+    const newCommentsComponent = new PopupCommentsView(this.#comments);
+
+    if (this.#popupComponent.checkCommentsRenderStatus()) {
+      replace(newCommentsComponent, this.#commentsComponent);
+      this.#commentsComponent = newCommentsComponent;
+      this.#commentsComponent.setDeleteButtonClickHandler(this.#onCommentDeleteButtonClick);
+      return;
+    }
+
+    this.#commentsComponent = newCommentsComponent;
+    render(this.#commentsComponent, this.#popupComponent.commentsContainer, RenderPosition.AFTERBEGIN);
     this.#commentsComponent.setDeleteButtonClickHandler(this.#onCommentDeleteButtonClick);
   };
 
@@ -80,17 +161,15 @@ export default class PopupPresenter {
 
     render(this.#popupComponent, this.#popupContainer);
     render(this.#controlsComponent, this.#popupComponent.controlsContainer);
-    render(this.#commentsComponent, this.#popupComponent.commentsContainer);
     render(this.#newCommentComponent, this.#popupComponent.commentsContainer);
 
-    this.#newCommentComponent.setFormSubmitHandler(this.#onFormSubmit);
-    this.#popupComponent.bodyAddHideOverflow();
-
     this.#setPopupHandlers();
-
+    this.#popupComponent.bodyAddHideOverflow();
     this.#popupStatus = Popup.RENDERED;
 
     document.addEventListener('keydown', this.#onPopupEscapeKeydown);
+
+    this.#renderComments();
   };
 
   #closePopup = () => {
@@ -116,33 +195,36 @@ export default class PopupPresenter {
   };
 
   #onPopupWatchlistControlClick = () => {
-    this.#film.userDetails.watchlist = !(this.#film.userDetails.watchlist);
-    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MAJOR, this.#film);
+    const film = JSON.parse(JSON.stringify(this.#film));
+
+    film.userDetails.watchlist = !(film.userDetails.watchlist);
+    this.#handleViewAction(UserAction.UPDATE_FILM_POPUP, UpdateType.MAJOR, film);
   };
 
   #onPopupWatchedControlClick = () => {
-    this.#film.userDetails.alreadyWatched = !(this.#film.userDetails.alreadyWatched);
-    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MAJOR, this.#film);
+    const film = JSON.parse(JSON.stringify(this.#film));
+
+    film.userDetails.alreadyWatched = !(film.userDetails.alreadyWatched);
+    this.#handleViewAction(UserAction.UPDATE_FILM_POPUP, UpdateType.MAJOR, film);
   };
 
   #onPopupFavoriteControlClick = () => {
-    this.#film.userDetails.favorite = !(this.#film.userDetails.favorite);
-    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MAJOR, this.#film);
+    const film = JSON.parse(JSON.stringify(this.#film));
+
+    film.userDetails.favorite = !(film.userDetails.favorite);
+    this.#handleViewAction(UserAction.UPDATE_FILM_POPUP, UpdateType.MAJOR, film);
   };
 
-  #onCommentDeleteButtonClick = (commentId) => {
-    const comment = this.#comments.find((item) => item.id === Number(commentId));
-    this.#film.comments = this.#film.comments.filter((item) => item !== Number(commentId));
+  #onCommentDeleteButtonClick = async (commentId) => {
+    const film = this.#film;
+    const comment = this.#comments.find((item) => item.id === commentId);
 
-    this.#changeData(UserAction.DELETE_COMMENT, UpdateType.PATCH, comment);
-    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
+    await this.#handleViewAction(UserAction.DELETE_COMMENT, UpdateType.MINOR, {film, comment});
   };
 
-  #onFormSubmit = (newComment) => {
-    this.#film.comments.push(newComment.id);
+  #onFormSubmit = async (newComment) => {
+    const film = this.#film;
 
-    this.#changeData(UserAction.UPDATE_FILM, UpdateType.PATCH, this.#film);
-    this.#changeData(UserAction.ADD_COMMENT, UpdateType.PATCH, newComment);
-    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
+    await this.#handleViewAction(UserAction.ADD_COMMENT, UpdateType.MINOR, {film, newComment});
   };
 }
