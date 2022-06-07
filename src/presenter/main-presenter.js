@@ -261,8 +261,10 @@ export default class MainPresenter {
         if (this.#extraSectionStatus.FIRST_RENDERED) {
           this.#clearExtraFilmsList(this.#filmPresenterFirstExtra);
 
+          const extraFilms = this.sourceFilms.filter((item) => item.filmInfo.totalRating > 0).sort(sortByRaiting);
+
           for (let i = 0; i < Math.min(RenderCount.FILM_CARDS_EXTRA, this.sourceFilms.length); i++) {
-            this.#renderFilm(this.sourceFilms.sort(sortByRaiting)[i], this.#firstExtraFilmsContainerComponent.element);
+            this.#renderFilm(extraFilms[i], this.#firstExtraFilmsContainerComponent.element);
           }
         } else {
           this.#renderExtra({first: true});
@@ -281,8 +283,10 @@ export default class MainPresenter {
         if (this.#extraSectionStatus.SECOND_RENDERED) {
           this.#clearExtraFilmsList(this.#filmPresenterSecondExtra);
 
+          const extraFilms = this.sourceFilms.filter((item) => item.comments.length > 0).sort(sortByCommentsCount);
+
           for (let i = 0; i < Math.min(RenderCount.FILM_CARDS_EXTRA, this.sourceFilms.length); i++) {
-            this.#renderFilm(this.sourceFilms.sort(sortByCommentsCount)[i], this.#secondExtraFilmsContainerComponent.element);
+            this.#renderFilm(extraFilms[i], this.#secondExtraFilmsContainerComponent.element);
           }
         } else {
           this.#renderExtra({second: true});
@@ -352,8 +356,10 @@ export default class MainPresenter {
 
       this.#extraSectionStatus = {...ExtraSection, FIRST_RENDERED: true};
 
+      const extraFilms = this.sourceFilms.filter((item) => item.filmInfo.totalRating > 0).sort(sortByRaiting);
+
       for (let i = 0; i < Math.min(RenderCount.FILM_CARDS_EXTRA, this.sourceFilms.length); i++) {
-        this.#renderFilm(this.sourceFilms.sort(sortByRaiting)[i], this.#firstExtraFilmsContainerComponent.element);
+        this.#renderFilm(extraFilms[i], this.#firstExtraFilmsContainerComponent.element);
       }
     }
 
@@ -363,8 +369,10 @@ export default class MainPresenter {
 
       this.#extraSectionStatus = {...ExtraSection, SECOND_RENDERED: true};
 
+      const extraFilms = this.sourceFilms.filter((item) => item.comments.length > 0).sort(sortByCommentsCount);
+
       for (let i = 0; i < Math.min(RenderCount.FILM_CARDS_EXTRA, this.sourceFilms.length); i++) {
-        this.#renderFilm(this.sourceFilms.sort(sortByCommentsCount)[i], this.#secondExtraFilmsContainerComponent.element);
+        this.#renderFilm(extraFilms[i], this.#secondExtraFilmsContainerComponent.element);
       }
     }
   };
