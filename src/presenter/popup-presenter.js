@@ -84,6 +84,8 @@ export default class PopupPresenter {
           isDisabled: true
         });
         break;
+      default:
+        throw new Error('Not expected actionType value');
     }
   };
 
@@ -102,7 +104,9 @@ export default class PopupPresenter {
       };
 
       this.#controlsComponent.shake(resetControlsState);
+      return;
     }
+
     if (actionType === UserAction.ADD_COMMENT) {
       const resetFormState = () => {
         this.#newCommentComponent.updateElement({
@@ -113,6 +117,7 @@ export default class PopupPresenter {
       };
 
       this.#newCommentComponent.shake(resetFormState);
+      return;
     }
 
     if (actionType === UserAction.DELETE_COMMENT) {
@@ -123,7 +128,10 @@ export default class PopupPresenter {
       };
 
       this.#commentsComponent.shake(resetCommentsState);
+      return;
     }
+
+    throw new Error('Not expected actionType value');
   };
 
   #setPopupHandlers = () => {

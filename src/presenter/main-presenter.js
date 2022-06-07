@@ -189,6 +189,10 @@ export default class MainPresenter {
           this.popupPresenter.get(update.film.id).setAborting(actionType);
         }
         break;
+
+      default:
+        this.#uiBlocker.unblock();
+        throw new Error('Not expected actionType value');
     }
 
     this.#uiBlocker.unblock();
@@ -217,6 +221,9 @@ export default class MainPresenter {
         this.#updateFilmsList();
         this.#renderNavigation();
         break;
+
+      default:
+        throw new Error('Not expected updateType value');
     }
   };
 
@@ -310,6 +317,8 @@ export default class MainPresenter {
       case this.#secondExtraFilmsContainerComponent.element:
         this.#filmPresenterSecondExtra.set(filmData.id, filmPresenter);
         break;
+      default:
+        throw new Error('Not expected container value');
     }
   };
 
