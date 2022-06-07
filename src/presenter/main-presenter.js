@@ -263,7 +263,7 @@ export default class MainPresenter {
 
           const extraFilms = this.sourceFilms.filter((item) => item.filmInfo.totalRating > 0).sort(sortByRaiting);
 
-          for (let i = 0; i < Math.min(RenderCount.FILM_CARDS_EXTRA, this.sourceFilms.length); i++) {
+          for (let i = 0; i < Math.min(RenderCount.FILM_CARDS_EXTRA, extraFilms.length); i++) {
             this.#renderFilm(extraFilms[i], this.#firstExtraFilmsContainerComponent.element);
           }
         } else {
@@ -285,7 +285,7 @@ export default class MainPresenter {
 
           const extraFilms = this.sourceFilms.filter((item) => item.comments.length > 0).sort(sortByCommentsCount);
 
-          for (let i = 0; i < Math.min(RenderCount.FILM_CARDS_EXTRA, this.sourceFilms.length); i++) {
+          for (let i = 0; i < Math.min(RenderCount.FILM_CARDS_EXTRA, extraFilms.length); i++) {
             this.#renderFilm(extraFilms[i], this.#secondExtraFilmsContainerComponent.element);
           }
         } else {
@@ -358,7 +358,7 @@ export default class MainPresenter {
 
       const extraFilms = this.sourceFilms.filter((item) => item.filmInfo.totalRating > 0).sort(sortByRaiting);
 
-      for (let i = 0; i < Math.min(RenderCount.FILM_CARDS_EXTRA, this.sourceFilms.length); i++) {
+      for (let i = 0; i < Math.min(RenderCount.FILM_CARDS_EXTRA, extraFilms.length); i++) {
         this.#renderFilm(extraFilms[i], this.#firstExtraFilmsContainerComponent.element);
       }
     }
@@ -371,7 +371,7 @@ export default class MainPresenter {
 
       const extraFilms = this.sourceFilms.filter((item) => item.comments.length > 0).sort(sortByCommentsCount);
 
-      for (let i = 0; i < Math.min(RenderCount.FILM_CARDS_EXTRA, this.sourceFilms.length); i++) {
+      for (let i = 0; i < Math.min(RenderCount.FILM_CARDS_EXTRA, extraFilms.length); i++) {
         this.#renderFilm(extraFilms[i], this.#secondExtraFilmsContainerComponent.element);
       }
     }
