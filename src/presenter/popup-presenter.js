@@ -2,7 +2,7 @@ import PopupView from '../view/popup-view.js';
 import PopupControlsView from '../view/popup-controls-view.js';
 import PopupCommentsView from '../view/popup-comments-view.js';
 import PopupNewCommentView from '../view/popup-new-comment-view.js';
-import ErrorCommentsView from '../view/error-comments-view.js';
+import StatusCommentsView from '../view/status-comments-view.js';
 import {fixScrollbarOpen, fixScrollbarClose} from '../utils/common.js';
 import {render, remove, replace} from '../framework/render.js';
 import {RenderPosition} from '../framework/render.js';
@@ -11,6 +11,11 @@ import {UserAction, UpdateType} from '../const.js';
 const Popup = {
   RENDERED: 'RENDERED',
   NOT_RENDERED: 'NOT_RENDERED'
+};
+
+const CommentsMessage = {
+  LOADING: 'Loading comments...',
+  ERROR: 'Failed to load comments'
 };
 
 export default class PopupPresenter {
@@ -74,8 +79,6 @@ export default class PopupPresenter {
     switch (actionType) {
       case UserAction.ADD_COMMENT:
         this.#newCommentComponent.updateElement({
-          emotion: '',
-          comment: '',
           isDisabled: true
         });
         break;
@@ -84,6 +87,8 @@ export default class PopupPresenter {
           isDisabled: true
         });
         break;
+      default:
+        throw new Error('Not expected actionType value');
     }
   };
 
@@ -102,17 +107,18 @@ export default class PopupPresenter {
       };
 
       this.#controlsComponent.shake(resetControlsState);
+      return;
     }
+
     if (actionType === UserAction.ADD_COMMENT) {
       const resetFormState = () => {
         this.#newCommentComponent.updateElement({
-          emotion: '',
-          comment: '',
           isDisabled: false
         });
       };
 
       this.#newCommentComponent.shake(resetFormState);
+      return;
     }
 
     if (actionType === UserAction.DELETE_COMMENT) {
@@ -123,7 +129,10 @@ export default class PopupPresenter {
       };
 
       this.#commentsComponent.shake(resetCommentsState);
+      return;
     }
+
+    throw new Error('Not expected actionType value');
   };
 
   #setPopupHandlers = () => {
@@ -135,12 +144,17 @@ export default class PopupPresenter {
   };
 
   #renderComments = async () => {
+    const loadingCommentsComponent = new StatusCommentsView(CommentsMessage.LOADING);
+    render(loadingCommentsComponent, this.#popupComponent.commentsContainer, RenderPosition.AFTERBEGIN);
+
     this.#comments = await this.#getFilmComments(this.#film.id);
 
     if (this.#comments === null) {
-      render(new ErrorCommentsView(), this.#popupComponent.commentsContainer, RenderPosition.AFTERBEGIN);
+      replace(new StatusCommentsView(CommentsMessage.ERROR), loadingCommentsComponent);
       return;
     }
+
+    remove(loadingCommentsComponent);
 
     const newCommentsComponent = new PopupCommentsView(this.#comments);
 

@@ -1,7 +1,6 @@
-import {render} from './framework/render.js';
-import NumberOfFilmsView from './view/number-of-films-view.js';
 import MainPresenter from './presenter/main-presenter.js';
 import UserPresenter from './presenter/user-presenter.js';
+import FooterPresenter from './presenter/footer-presenter.js';
 import FilmsModel from './model/films-model.js';
 import CommentsModel from './model/comments-model.js';
 import FilmsApiService from './services/films-api-service.js';
@@ -19,10 +18,9 @@ const commentsModel = new CommentsModel(new CommentsApiService(END_POINT, AUTHOR
 
 const userPresenter = new UserPresenter(header, filmsModel);
 const mainPresenter = new MainPresenter(main, filmsModel, commentsModel);
+const footerPresenter = new FooterPresenter(footerStatistics, filmsModel);
 
 userPresenter.init();
 mainPresenter.init();
-
-render(new NumberOfFilmsView(filmsModel.films), footerStatistics);
-
+footerPresenter.init();
 filmsModel.init();

@@ -36,7 +36,7 @@ export default class PopupView extends AbstractView {
     this.#ageRating = film.filmInfo.ageRating;
     this.#title = film.filmInfo.title;
     this.#alternativeTitle = film.filmInfo.alternativeTitle;
-    this.#totalRating = film.filmInfo.totalRating;
+    this.#totalRating = film.filmInfo.totalRating.toFixed(1);
     this.#director = film.filmInfo.director;
     this.#writers = film.filmInfo.writers;
     this.#actors = film.filmInfo.actors;

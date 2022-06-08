@@ -1,4 +1,5 @@
 import UserView from '../view/user-view.js';
+import {UpdateType} from '../const.js';
 import {render, remove, replace} from '../framework/render.js';
 
 export default class UserPresenter {
@@ -32,7 +33,11 @@ export default class UserPresenter {
     remove(prevUserComponetn);
   };
 
-  #handleModelEvent = () => {
+  #handleModelEvent = (updateType) => {
+    if (updateType === UpdateType.PATCH) {
+      return;
+    }
+
     this.init();
   };
 }

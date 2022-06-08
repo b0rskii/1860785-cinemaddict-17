@@ -23,7 +23,7 @@ export default class FilmCardView extends AbstractStatefulView{
     super();
     this._state = this.#convertDataToState(film);
     this.#title = this._state.filmInfo.title;
-    this.#totalRating = this._state.filmInfo.totalRating;
+    this.#totalRating = this._state.filmInfo.totalRating.toFixed(1);
     this.#poster = this._state.filmInfo.poster;
     this.#description = this._state.filmInfo.description;
     this.#runtime = this._state.filmInfo.runtime;
