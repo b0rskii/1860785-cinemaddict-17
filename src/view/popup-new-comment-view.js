@@ -89,19 +89,22 @@ export default class PopupNewCommentView extends AbstractStatefulView {
     this.element.closest('form').addEventListener('keydown', this.#formSubmitHandler);
   };
 
-  #formSubmitHandler = async (evt) => {
+  removeFormSubmitHandler = () => {
+    this.element.closest('form').removeEventListener('keydown', this.#formSubmitHandler);
+  };
+
+  #formSubmitHandler = (evt) => {
     if (evt.key === 'Enter' && (evt.ctrlKey || evt.metaKey) && this._state.emotion !== '') {
       const newComment = {
         comment: he.encode(this._state.comment),
         emotion: this._state.emotion
       };
 
-      await this._callback.formSubmit(newComment);
+      this._callback.formSubmit(newComment);
     }
   };
 
   _restoreHandlers = () => {
     this.#setInnerHandlers();
-    this.setFormSubmitHandler(this._callback.formSubmit);
   };
 }

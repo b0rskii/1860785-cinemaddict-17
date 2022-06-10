@@ -2,11 +2,13 @@ import Observable from '../framework/observable.js';
 
 export default class CommentsModel extends Observable {
   #commentsApiService = null;
+  #filmsModel = null;
   #comments = [];
 
-  constructor (commentsApiService) {
+  constructor (commentsApiService, filmsModel) {
     super();
     this.#commentsApiService = commentsApiService;
+    this.#filmsModel = filmsModel;
   }
 
   getFilmComments = async (filmId) => {
@@ -24,7 +26,8 @@ export default class CommentsModel extends Observable {
       const updatedComments = response.comments;
 
       this.#comments = updatedComments;
-      this._notify(updateType, update.film);
+
+      this.#filmsModel.updateFilm(updateType, update.film);
     } catch {
       throw new Error('Can\'t add comment');
     }
@@ -43,7 +46,8 @@ export default class CommentsModel extends Observable {
         ...this.#comments.slice(0, index),
         ...this.#comments.slice(index + 1)
       ];
-      this._notify(updateType, update.film);
+
+      this.#filmsModel.updateFilm(updateType, update.film);
     } catch {
       throw new Error('Can\'t delete comment');
     }

@@ -211,6 +211,7 @@ export default class PopupPresenter {
   #onPopupWatchlistControlClick = () => {
     const film = JSON.parse(JSON.stringify(this.#film));
 
+    this.#newCommentComponent.removeFormSubmitHandler();
     film.userDetails.watchlist = !(film.userDetails.watchlist);
     this.#handleViewAction(UserAction.UPDATE_FILM_POPUP, UpdateType.MAJOR, film);
   };
@@ -218,6 +219,7 @@ export default class PopupPresenter {
   #onPopupWatchedControlClick = () => {
     const film = JSON.parse(JSON.stringify(this.#film));
 
+    this.#newCommentComponent.removeFormSubmitHandler();
     film.userDetails.alreadyWatched = !(film.userDetails.alreadyWatched);
     this.#handleViewAction(UserAction.UPDATE_FILM_POPUP, UpdateType.MAJOR, film);
   };
@@ -225,20 +227,23 @@ export default class PopupPresenter {
   #onPopupFavoriteControlClick = () => {
     const film = JSON.parse(JSON.stringify(this.#film));
 
+    this.#newCommentComponent.removeFormSubmitHandler();
     film.userDetails.favorite = !(film.userDetails.favorite);
     this.#handleViewAction(UserAction.UPDATE_FILM_POPUP, UpdateType.MAJOR, film);
   };
 
-  #onCommentDeleteButtonClick = async (commentId) => {
+  #onCommentDeleteButtonClick = (commentId) => {
     const film = this.#film;
     const comment = this.#comments.find((item) => item.id === commentId);
 
-    await this.#handleViewAction(UserAction.DELETE_COMMENT, UpdateType.MINOR, {film, comment});
+    this.#newCommentComponent.removeFormSubmitHandler();
+    this.#handleViewAction(UserAction.DELETE_COMMENT, UpdateType.MINOR, {film, comment});
   };
 
-  #onFormSubmit = async (newComment) => {
+  #onFormSubmit = (newComment) => {
     const film = this.#film;
 
-    await this.#handleViewAction(UserAction.ADD_COMMENT, UpdateType.MINOR, {film, newComment});
+    this.#newCommentComponent.removeFormSubmitHandler();
+    this.#handleViewAction(UserAction.ADD_COMMENT, UpdateType.MINOR, {film, newComment});
   };
 }

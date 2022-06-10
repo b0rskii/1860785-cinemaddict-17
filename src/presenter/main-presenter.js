@@ -174,7 +174,6 @@ export default class MainPresenter {
         this.popupPresenter.get(update.film.id).setSaving(actionType);
         try {
           await this.#commentsModel.addComment(updateType, update);
-          this.#filmsModel.updateFilm(updateType, update.film);
         } catch {
           this.popupPresenter.get(update.film.id).setAborting(actionType);
         }
@@ -184,7 +183,6 @@ export default class MainPresenter {
         this.popupPresenter.get(update.film.id).setDeleting(update.comment);
         try {
           await this.#commentsModel.deleteComment(updateType, update);
-          this.#filmsModel.updateFilm(updateType, update.film);
         } catch {
           this.popupPresenter.get(update.film.id).setAborting(actionType);
         }
