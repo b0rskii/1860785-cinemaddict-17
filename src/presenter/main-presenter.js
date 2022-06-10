@@ -22,9 +22,11 @@ const RenderCount = {
 
 const ExtraSection = {
   FIRST_TITLE: 'Top rated',
-  FIRST_RENDERED: false,
+  FIRST_RENDERED: 'FIRST_RENDERED',
+  FIRST_NOT_RENDERED: 'FIRST_NOT_RENDERED',
   SECOND_TITLE: 'Most commented',
-  SECOND_RENDERED: false
+  SECOND_RENDERED: 'SECOND_RENDERED',
+  SECOND_NOT_RENDERED: 'SECOND_NOT_RENDERED'
 };
 
 const TimeLimit = {
@@ -43,7 +45,8 @@ export default class MainPresenter {
   #uiBlocker = new UiBlocker(TimeLimit.LOWER, TimeLimit.UPPER);
   #currentSortType = SortType.DEFAULT;
   #currentFilterType = FilterType.ALL;
-  #extraSectionStatus = ExtraSection;
+  #firstExtraSectionStatus = ExtraSection.FIRST_NOT_RENDERED;
+  #secondExtraSectionStatus = ExtraSection.SECOND_NOT_RENDERED;
   #renderedFilmCardsCount = 0;
   #isLoading = true;
 
@@ -256,7 +259,7 @@ export default class MainPresenter {
 
     if (updateFirstExtra) {
       if (this.sourceFilms.find((item) => item.filmInfo.totalRating > 0)) {
-        if (this.#extraSectionStatus.FIRST_RENDERED) {
+        if (this.#firstExtraSectionStatus === ExtraSection.FIRST_RENDERED) {
           this.#clearExtraFilmsList(this.#filmPresenterFirstExtra);
 
           const extraFilms = this.sourceFilms.filter((item) => item.filmInfo.totalRating > 0).sort(sortByRaiting);
@@ -272,13 +275,13 @@ export default class MainPresenter {
         remove(this.#firstExtraSectionComponent);
         remove(this.#firstExtraFilmsContainerComponent);
 
-        this.#extraSectionStatus = {...ExtraSection, FIRST_RENDERED: false};
+        this.#firstExtraSectionStatus = ExtraSection.FIRST_NOT_RENDERED;
       }
     }
 
     if (updateSecondExtra) {
       if (this.sourceFilms.find((item) => item.comments.length > 0)) {
-        if (this.#extraSectionStatus.SECOND_RENDERED) {
+        if (this.#secondExtraSectionStatus === ExtraSection.SECOND_RENDERED) {
           this.#clearExtraFilmsList(this.#filmPresenterSecondExtra);
 
           const extraFilms = this.sourceFilms.filter((item) => item.comments.length > 0).sort(sortByCommentsCount);
@@ -294,7 +297,7 @@ export default class MainPresenter {
         remove(this.#secondExtraSectionComponent);
         remove(this.#secondExtraFilmsContainerComponent);
 
-        this.#extraSectionStatus = {...ExtraSection, SECOND_RENDERED: false};
+        this.#secondExtraSectionStatus = ExtraSection.SECOND_NOT_RENDERED;
       }
     }
   };
@@ -352,7 +355,7 @@ export default class MainPresenter {
       render(this.#firstExtraSectionComponent, this.#filmsSectionComponent.element);
       render(this.#firstExtraFilmsContainerComponent, this.#firstExtraSectionComponent.element);
 
-      this.#extraSectionStatus = {...ExtraSection, FIRST_RENDERED: true};
+      this.#firstExtraSectionStatus = ExtraSection.FIRST_RENDERED;
 
       const extraFilms = this.sourceFilms.filter((item) => item.filmInfo.totalRating > 0).sort(sortByRaiting);
 
@@ -365,7 +368,7 @@ export default class MainPresenter {
       render(this.#secondExtraSectionComponent, this.#filmsSectionComponent.element);
       render(this.#secondExtraFilmsContainerComponent, this.#secondExtraSectionComponent.element);
 
-      this.#extraSectionStatus = {...ExtraSection, SECOND_RENDERED: true};
+      this.#secondExtraSectionStatus = ExtraSection.SECOND_RENDERED;
 
       const extraFilms = this.sourceFilms.filter((item) => item.comments.length > 0).sort(sortByCommentsCount);
 
