@@ -138,10 +138,10 @@ export default class PopupPresenter {
 
   #setPopupHandlers = () => {
     this.#popupComponent.setCloseButtonClickHandler(this.#closePopup);
-    this.#controlsComponent.setWatchlistClickHandler(this.#onPopupWatchlistControlClick);
-    this.#controlsComponent.setWatchedClickHandler(this.#onPopupWatchedControlClick);
-    this.#controlsComponent.setFavoriteClickHandler(this.#onPopupFavoriteControlClick);
-    this.#newCommentComponent.setFormSubmitHandler(this.#onFormSubmit);
+    this.#controlsComponent.setWatchlistClickHandler(this.#watchlistControlClickHandler);
+    this.#controlsComponent.setWatchedClickHandler(this.#watchedControlClickHandler);
+    this.#controlsComponent.setFavoriteClickHandler(this.#favoriteControlClickHandler);
+    this.#newCommentComponent.setFormSubmitHandler(this.#formSubmitHandler);
   };
 
   #renderComments = async () => {
@@ -162,13 +162,13 @@ export default class PopupPresenter {
     if (this.#popupComponent.checkCommentsRenderStatus()) {
       replace(newCommentsComponent, this.#commentsComponent);
       this.#commentsComponent = newCommentsComponent;
-      this.#commentsComponent.setDeleteButtonClickHandler(this.#onCommentDeleteButtonClick);
+      this.#commentsComponent.setDeleteButtonClickHandler(this.#commentDeleteButtonClickHandler);
       return;
     }
 
     this.#commentsComponent = newCommentsComponent;
     render(this.#commentsComponent, this.#popupComponent.commentsContainer, RenderPosition.AFTERBEGIN);
-    this.#commentsComponent.setDeleteButtonClickHandler(this.#onCommentDeleteButtonClick);
+    this.#commentsComponent.setDeleteButtonClickHandler(this.#commentDeleteButtonClickHandler);
   };
 
   #renderPopup = () => {
@@ -203,7 +203,7 @@ export default class PopupPresenter {
     this.#popupComponent.bodyRemoveHideOverflow();
   };
 
-  #onPopupWatchlistControlClick = () => {
+  #watchlistControlClickHandler = () => {
     const film = JSON.parse(JSON.stringify(this.#film));
 
     this.#newCommentComponent.removeFormSubmitHandler();
@@ -212,7 +212,7 @@ export default class PopupPresenter {
     this.#handleViewAction(UserAction.UPDATE_FILM_POPUP, UpdateType.MAJOR, film);
   };
 
-  #onPopupWatchedControlClick = () => {
+  #watchedControlClickHandler = () => {
     const film = JSON.parse(JSON.stringify(this.#film));
 
     this.#newCommentComponent.removeFormSubmitHandler();
@@ -221,7 +221,7 @@ export default class PopupPresenter {
     this.#handleViewAction(UserAction.UPDATE_FILM_POPUP, UpdateType.MAJOR, film);
   };
 
-  #onPopupFavoriteControlClick = () => {
+  #favoriteControlClickHandler = () => {
     const film = JSON.parse(JSON.stringify(this.#film));
 
     this.#newCommentComponent.removeFormSubmitHandler();
@@ -230,7 +230,7 @@ export default class PopupPresenter {
     this.#handleViewAction(UserAction.UPDATE_FILM_POPUP, UpdateType.MAJOR, film);
   };
 
-  #onCommentDeleteButtonClick = (commentId) => {
+  #commentDeleteButtonClickHandler = (commentId) => {
     const film = this.#film;
     const comment = this.#comments.find((item) => item.id === commentId);
 
@@ -238,7 +238,7 @@ export default class PopupPresenter {
     this.#handleViewAction(UserAction.DELETE_COMMENT, UpdateType.MINOR, {film, comment});
   };
 
-  #onFormSubmit = (newComment) => {
+  #formSubmitHandler = (newComment) => {
     const film = this.#film;
 
     this.#newCommentComponent.removeFormSubmitHandler();

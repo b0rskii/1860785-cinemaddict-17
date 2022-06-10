@@ -33,10 +33,10 @@ export default class FilmPresenter {
 
     this.#filmComponent = new FilmCardView(film);
 
-    this.#filmComponent.setClickHandler(this.#onFilmCardClick);
-    this.#filmComponent.setWatchlistClickHandler(this.#onWatchlistControlClick);
-    this.#filmComponent.setWatchedClickHandler(this.#onWatchedControlClick);
-    this.#filmComponent.setFavoriteClickHandler(this.#onFavoriteControlClick);
+    this.#filmComponent.setClickHandler(this.#filmCardClickHandler);
+    this.#filmComponent.setWatchlistClickHandler(this.#watchlistControlClickHandler);
+    this.#filmComponent.setWatchedClickHandler(this.#watchedControlClickHandler);
+    this.#filmComponent.setFavoriteClickHandler(this.#favoriteControlClickHandler);
 
     if (prevFilmComponent === null) {
       render(this.#filmComponent, this.#container);
@@ -71,7 +71,7 @@ export default class FilmPresenter {
     this.#filmComponent.shake(resetFilmState);
   };
 
-  #onFilmCardClick = () => {
+  #filmCardClickHandler = () => {
     if (this.popupPresenter.size > 0 && !this.popupPresenter.has(this.#film.id)) {
       this.popupPresenter.forEach((item) => item.destroy());
       this.popupPresenter.clear();
@@ -87,21 +87,21 @@ export default class FilmPresenter {
     }
   };
 
-  #onWatchlistControlClick = () => {
+  #watchlistControlClickHandler = () => {
     const film = JSON.parse(JSON.stringify(this.#film));
 
     film.userDetails.watchlist = !(film.userDetails.watchlist);
     this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.MAJOR, film);
   };
 
-  #onWatchedControlClick = () => {
+  #watchedControlClickHandler = () => {
     const film = JSON.parse(JSON.stringify(this.#film));
 
     film.userDetails.alreadyWatched = !(film.userDetails.alreadyWatched);
     this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.MAJOR, film);
   };
 
-  #onFavoriteControlClick = () => {
+  #favoriteControlClickHandler = () => {
     const film = JSON.parse(JSON.stringify(this.#film));
 
     film.userDetails.favorite = !(film.userDetails.favorite);

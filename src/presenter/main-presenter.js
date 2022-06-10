@@ -105,7 +105,7 @@ export default class MainPresenter {
       render(this.#navigationComponent, this.#container);
 
       if (!this.#isLoading) {
-        this.#navigationComponent.setClickHandler(this.#onFilterClick);
+        this.#navigationComponent.setClickHandler(this.#filterClickHandler);
       }
 
       return;
@@ -113,12 +113,12 @@ export default class MainPresenter {
 
     replace(newNavigationComponent, this.#navigationComponent);
     this.#navigationComponent = newNavigationComponent;
-    this.#navigationComponent.setClickHandler(this.#onFilterClick);
+    this.#navigationComponent.setClickHandler(this.#filterClickHandler);
   };
 
   #renderSort = () => {
     render(this.#sortComponent, this.#navigationComponent.element, RenderPosition.AFTEREND);
-    this.#sortComponent.setClickHandler(this.#onSortClick);
+    this.#sortComponent.setClickHandler(this.#sortClickHandler);
   };
 
   #renderInitialFilmsLists = () => {
@@ -426,7 +426,7 @@ export default class MainPresenter {
     this.#renderPartFilmCards(count, this.films);
   };
 
-  #onFilterClick = (filterType) => {
+  #filterClickHandler = (filterType) => {
     if (this.#currentFilterType === filterType) {
       return;
     }
@@ -440,7 +440,7 @@ export default class MainPresenter {
     this.#updateFilteredFilms(RenderCount.FILM_CARDS);
   };
 
-  #onSortClick = (sortType) => {
+  #sortClickHandler = (sortType) => {
     if (this.#currentSortType === sortType) {
       return;
     }
