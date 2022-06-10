@@ -39,6 +39,7 @@ export default class MainPresenter {
   #filmsModel = null;
   #commentsModel = null;
 
+  #filmPresenterAllRendered = new Map();
   #filmPresenter = new Map();
   #filmPresenterFirstExtra = new Map();
   #filmPresenterSecondExtra = new Map();
@@ -156,11 +157,11 @@ export default class MainPresenter {
 
     switch (actionType) {
       case UserAction.UPDATE_FILM:
-        this.#filmPresenter.get(update.id).setSaving();
+        this.#filmPresenterAllRendered.get(update.id).setSaving();
         try {
           await this.#filmsModel.updateFilm(updateType, update);
         } catch {
-          this.#filmPresenter.get(update.id).setAborting();
+          this.#filmPresenterAllRendered.get(update.id).setAborting();
         }
         break;
 
@@ -312,6 +313,8 @@ export default class MainPresenter {
 
     filmPresenter.init(filmData, this.getFilmComments);
 
+    this.#filmPresenterAllRendered.set(filmData.id, filmPresenter);
+
     switch (container) {
       case this.#filmsListContainerComponent.element:
         this.#filmPresenter.set(filmData.id, filmPresenter);
@@ -346,7 +349,8 @@ export default class MainPresenter {
 
     if (data.length === remainingFilmCardsCount && data.length > count && count >= RenderCount.FILM_CARDS) {
       this.#renderShowMoreButton(this.#filmsListSectionComponent.element);
-      this.#showMoreButtonComponent.setClickHandler(() => this.#renderPartFilmCards(count, data));
+      this.#showMoreButtonComponent
+        .setClickHandler(() => this.#renderPartFilmCards(Math.min(count, RenderCount.FILM_CARDS), data));
     }
   };
 
@@ -385,6 +389,13 @@ export default class MainPresenter {
   #clearFilmsList = () => {
     this.#filmPresenter.forEach((item) => item.destroy());
     this.#filmPresenter.clear();
+
+    for (const key of this.#filmPresenterAllRendered.keys()) {
+      if (!this.#filmPresenterFirstExtra.has(key) && !this.#filmPresenterSecondExtra.has(key)) {
+        this.#filmPresenterAllRendered.delete(key);
+      }
+    }
+
     this.#renderedFilmCardsCount = 0;
     remove(this.#showMoreButtonComponent);
   };
