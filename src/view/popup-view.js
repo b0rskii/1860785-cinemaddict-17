@@ -30,6 +30,9 @@ export default class PopupView extends AbstractView {
   #genresTerm = null;
   #description = null;
 
+  #body = document.querySelector('body');
+  #closeButton = null;
+
   constructor (film) {
     super();
     this.#poster = film.filmInfo.poster;
@@ -46,6 +49,8 @@ export default class PopupView extends AbstractView {
     this.#genre = film.filmInfo.genre;
     this.#genresTerm = this.#genre.length > 1 ? 'Genres' : 'Genre';
     this.#description = film.filmInfo.description;
+
+    this.#closeButton = this.element.querySelector('.film-details__close-btn');
   }
 
   get template() {
@@ -138,16 +143,16 @@ export default class PopupView extends AbstractView {
   checkCommentsRenderStatus = () => document.querySelector('.film-details__comments-list');
 
   bodyAddHideOverflow = () => {
-    document.querySelector('body').classList.add('hide-overflow');
+    this.#body.classList.add('hide-overflow');
   };
 
   bodyRemoveHideOverflow = () => {
-    document.querySelector('body').classList.remove('hide-overflow');
+    this.#body.classList.remove('hide-overflow');
   };
 
   setCloseButtonClickHandler = (callback) => {
     this._callback.closeButtonClick = callback;
-    this.element.querySelector('.film-details__close-btn').addEventListener('click', this.#closeButtonClickHandler);
+    this.#closeButton.addEventListener('click', this.#closeButtonClickHandler);
   };
 
   setEscapeKeydownHandler = (callback) => {

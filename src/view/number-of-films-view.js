@@ -9,6 +9,6 @@ export default class NumberOfFilmsView extends AbstractView {
   }
 
   get template() {
-    return `<p>${this.#numberOfFilms} movies inside</p>`;
+    return `<p>${this.#numberOfFilms.toLocaleString()} movies inside</p>`;
   }
 }

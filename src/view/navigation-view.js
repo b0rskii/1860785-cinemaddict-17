@@ -9,12 +9,16 @@ export default class NavigationView extends AbstractView {
   #favoriteFilms = [];
   #activeFilter = null;
 
+  #filters = null;
+
   constructor (films, activeFilter) {
     super();
     this.#watchlistFilms = filter[FilterType.WATCHLIST](films);
     this.#watchedFilms = filter[FilterType.WATCHED](films);
     this.#favoriteFilms = filter[FilterType.FAVORITES](films);
     this.#activeFilter = activeFilter;
+
+    this.#filters = this.element.querySelectorAll('.main-navigation__item');
   }
 
   get template() {
@@ -27,9 +31,7 @@ export default class NavigationView extends AbstractView {
   }
 
   changeActiveElement = (filterType) => {
-    const filters = this.element.querySelectorAll('.main-navigation__item');
-
-    for (const item of filters) {
+    for (const item of this.#filters) {
       if (item.classList.contains(ActiveClass.NAVIGATION_ITEM)) {
         item.classList.remove(ActiveClass.NAVIGATION_ITEM);
         break;
