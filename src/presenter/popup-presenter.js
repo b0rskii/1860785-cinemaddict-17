@@ -30,9 +30,10 @@ export default class PopupPresenter {
   #commentsComponent = null;
   #newCommentComponent = null;
   #getFilmComments = null;
+  #handleViewAction = null;
 
   #popupStatus = Popup.NOT_RENDERED;
-  #handleViewAction = null;
+  #escapeKeydownHandlerContext = null;
 
   constructor (handleViewAction, popupPresenter, prevPopupComponent, getFilmComments) {
     this.#handleViewAction = handleViewAction;
@@ -72,7 +73,7 @@ export default class PopupPresenter {
 
   destroy = () => {
     remove(this.#popupComponent);
-    document.removeEventListener('keydown', this.#onPopupEscapeKeydown);
+    this.#escapeKeydownHandlerContext.removeEscapeKeydownHandler();
   };
 
   setSaving = (actionType) => {
@@ -136,7 +137,7 @@ export default class PopupPresenter {
   };
 
   #setPopupHandlers = () => {
-    this.#popupComponent.setClickHandler(this.#closePopup);
+    this.#popupComponent.setCloseButtonClickHandler(this.#closePopup);
     this.#controlsComponent.setWatchlistClickHandler(this.#onPopupWatchlistControlClick);
     this.#controlsComponent.setWatchedClickHandler(this.#onPopupWatchedControlClick);
     this.#controlsComponent.setFavoriteClickHandler(this.#onPopupFavoriteControlClick);
@@ -176,14 +177,14 @@ export default class PopupPresenter {
     render(this.#popupComponent, this.#popupContainer);
     render(this.#controlsComponent, this.#popupComponent.controlsContainer);
     render(this.#newCommentComponent, this.#popupComponent.commentsContainer);
+    this.#renderComments();
 
     this.#setPopupHandlers();
+    this.#popupComponent.setEscapeKeydownHandler(this.#closePopup);
+    this.#escapeKeydownHandlerContext = this.#popupComponent;
+
     this.#popupComponent.bodyAddHideOverflow();
     this.#popupStatus = Popup.RENDERED;
-
-    document.addEventListener('keydown', this.#onPopupEscapeKeydown);
-
-    this.#renderComments();
   };
 
   #closePopup = () => {
@@ -202,16 +203,11 @@ export default class PopupPresenter {
     this.#popupComponent.bodyRemoveHideOverflow();
   };
 
-  #onPopupEscapeKeydown = (evt) => {
-    if (evt.key === 'Escape' || evt.key === 'Esc') {
-      this.#closePopup();
-    }
-  };
-
   #onPopupWatchlistControlClick = () => {
     const film = JSON.parse(JSON.stringify(this.#film));
 
     this.#newCommentComponent.removeFormSubmitHandler();
+
     film.userDetails.watchlist = !(film.userDetails.watchlist);
     this.#handleViewAction(UserAction.UPDATE_FILM_POPUP, UpdateType.MAJOR, film);
   };
@@ -220,6 +216,7 @@ export default class PopupPresenter {
     const film = JSON.parse(JSON.stringify(this.#film));
 
     this.#newCommentComponent.removeFormSubmitHandler();
+
     film.userDetails.alreadyWatched = !(film.userDetails.alreadyWatched);
     this.#handleViewAction(UserAction.UPDATE_FILM_POPUP, UpdateType.MAJOR, film);
   };
@@ -228,6 +225,7 @@ export default class PopupPresenter {
     const film = JSON.parse(JSON.stringify(this.#film));
 
     this.#newCommentComponent.removeFormSubmitHandler();
+
     film.userDetails.favorite = !(film.userDetails.favorite);
     this.#handleViewAction(UserAction.UPDATE_FILM_POPUP, UpdateType.MAJOR, film);
   };

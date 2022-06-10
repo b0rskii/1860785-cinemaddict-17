@@ -145,12 +145,27 @@ export default class PopupView extends AbstractView {
     document.querySelector('body').classList.remove('hide-overflow');
   };
 
-  setClickHandler = (callback) => {
+  setCloseButtonClickHandler = (callback) => {
     this._callback.closeButtonClick = callback;
     this.element.querySelector('.film-details__close-btn').addEventListener('click', this.#closeButtonClickHandler);
   };
 
+  setEscapeKeydownHandler = (callback) => {
+    this._callback.setEscapeKeydown = callback;
+    document.addEventListener('keydown', this.#escapeKeydownHandler);
+  };
+
+  removeEscapeKeydownHandler = () => {
+    document.removeEventListener('keydown', this.#escapeKeydownHandler);
+  };
+
   #closeButtonClickHandler = () => {
     this._callback.closeButtonClick();
+  };
+
+  #escapeKeydownHandler = (evt) => {
+    if (evt.key === 'Escape' || evt.key === 'Esc') {
+      this._callback.setEscapeKeydown();
+    }
   };
 }
