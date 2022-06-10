@@ -68,4 +68,13 @@ const Method = {
   POST: 'POST'
 };
 
-export {FilterType, ActiveClass, SortType, UserRank, Emoji, UserAction, UpdateType, Method};
+export {
+  FilterType,
+  ActiveClass,
+  SortType,
+  UserRank,
+  Emoji,
+  UserAction,
+  UpdateType,
+  Method
+};

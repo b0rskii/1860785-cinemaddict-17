@@ -49,11 +49,6 @@ export default class PopupNewCommentView extends AbstractStatefulView {
     isDisabled: false
   });
 
-  #setInnerHandlers = () => {
-    this.element.querySelector('.film-details__emoji-list').addEventListener('click', this.#onEmojiClick);
-    this.element.querySelector('.film-details__comment-input').addEventListener('input', this.#onNewCommentInput);
-  };
-
   #onEmojiClick = (evt) => {
     if (evt.target.matches('img')) {
       const input = evt.target.parentElement.previousElementSibling;
@@ -84,6 +79,15 @@ export default class PopupNewCommentView extends AbstractStatefulView {
     });
   };
 
+  _restoreHandlers = () => {
+    this.#setInnerHandlers();
+  };
+
+  #setInnerHandlers = () => {
+    this.element.querySelector('.film-details__emoji-list').addEventListener('click', this.#onEmojiClick);
+    this.element.querySelector('.film-details__comment-input').addEventListener('input', this.#onNewCommentInput);
+  };
+
   setFormSubmitHandler = (callback) => {
     this._callback.formSubmit = callback;
     this.element.closest('form').addEventListener('keydown', this.#formSubmitHandler);
@@ -102,9 +106,5 @@ export default class PopupNewCommentView extends AbstractStatefulView {
 
       this._callback.formSubmit(newComment);
     }
-  };
-
-  _restoreHandlers = () => {
-    this.#setInnerHandlers();
   };
 }

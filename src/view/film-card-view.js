@@ -61,6 +61,13 @@ export default class FilmCardView extends AbstractStatefulView{
     isDisabled: false
   });
 
+  _restoreHandlers = () => {
+    this.setClickHandler(this._callback.click);
+    this.setWatchlistClickHandler(this._callback.watchlistClick);
+    this.setWatchedClickHandler(this._callback.watchedClick);
+    this.setFavoriteClickHandler(this._callback.favoriteClick);
+  };
+
   setClickHandler = (callback) => {
     this._callback.click = callback;
     this.element.addEventListener('click', this.#clickHandler);
@@ -97,12 +104,5 @@ export default class FilmCardView extends AbstractStatefulView{
 
   #favoriteClickHandler = () => {
     this._callback.favoriteClick();
-  };
-
-  _restoreHandlers = () => {
-    this.setClickHandler(this._callback.click);
-    this.setWatchlistClickHandler(this._callback.watchlistClick);
-    this.setWatchedClickHandler(this._callback.watchedClick);
-    this.setFavoriteClickHandler(this._callback.favoriteClick);
   };
 }

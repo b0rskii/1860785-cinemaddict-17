@@ -395,7 +395,7 @@ export default class MainPresenter {
   };
 
   #renderComponentsDependingOnFilmsPresence = (films) => {
-    if (films.length === 0 && this.#filmsListContainerComponent.checkOnFilmsListPresence()) {
+    if (films.length === 0 && this.#filmsListContainerComponent.checkRenderStatus()) {
       this.#noFilmsComponent = new NoFilmsView(this.#currentFilterType);
 
       remove(this.#filmsListContainerComponent);
@@ -415,7 +415,7 @@ export default class MainPresenter {
       return;
     }
 
-    if (films.length !== 0 && !this.#filmsListContainerComponent.checkOnFilmsListPresence()) {
+    if (films.length !== 0 && !this.#filmsListContainerComponent.checkRenderStatus()) {
       replace(this.#filmsListSectionComponent, this.#noFilmsComponent);
       render(this.#filmsListContainerComponent, this.#filmsListSectionComponent.element);
       this.#renderSort(this.#navigationComponent.element, RenderPosition.AFTEREND);

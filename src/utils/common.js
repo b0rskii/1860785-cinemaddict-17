@@ -39,4 +39,11 @@ const addClassByCondition = (condition, className) => {
   return '';
 };
 
-export {getRandomInteger, getRandomNoInteger, getConsecutiveNumbers, fixScrollbarOpen, fixScrollbarClose, addClassByCondition};
+export {
+  getRandomInteger,
+  getRandomNoInteger,
+  getConsecutiveNumbers,
+  fixScrollbarOpen,
+  fixScrollbarClose,
+  addClassByCondition
+};

@@ -27,6 +27,12 @@ export default class PopupControlsView extends AbstractStatefulView {
     isDisabled: false
   });
 
+  _restoreHandlers = () => {
+    this.setWatchlistClickHandler(this._callback.watchlistClick);
+    this.setWatchedClickHandler(this._callback.watchedClick);
+    this.setFavoriteClickHandler(this._callback.favoriteClick);
+  };
+
   setWatchlistClickHandler = (callback) => {
     this._callback.watchlistClick = callback;
     this.element.querySelector('.film-details__control-button--watchlist').addEventListener('click', this.#watchlistClickHandler);
@@ -52,11 +58,5 @@ export default class PopupControlsView extends AbstractStatefulView {
 
   #favoriteClickHandler = () => {
     this._callback.favoriteClick();
-  };
-
-  _restoreHandlers = () => {
-    this.setWatchlistClickHandler(this._callback.watchlistClick);
-    this.setWatchedClickHandler(this._callback.watchedClick);
-    this.setFavoriteClickHandler(this._callback.favoriteClick);
   };
 }

@@ -51,6 +51,10 @@ export default class PopupCommentsView extends AbstractStatefulView {
     deletingCommentId: ''
   });
 
+  _restoreHandlers = () => {
+    this.setDeleteButtonClickHandler(this._callback.deleteClick);
+  };
+
   setDeleteButtonClickHandler = (callback) => {
     this._callback.deleteClick = callback;
     this.element.addEventListener('click', this.#deleteButtonClickHandler);
@@ -64,9 +68,5 @@ export default class PopupCommentsView extends AbstractStatefulView {
 
       this._callback.deleteClick(commentId);
     }
-  };
-
-  _restoreHandlers = () => {
-    this.setDeleteButtonClickHandler(this._callback.deleteClick);
   };
 }
