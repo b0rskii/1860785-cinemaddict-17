@@ -19,10 +19,6 @@ export default class FilmCardView extends AbstractStatefulView{
   #isWatchedFilm = null;
   #isFavoriteFilm = null;
 
-  #watchlistButton = null;
-  #watchedButton = null;
-  #favoriteButton = null;
-
   constructor (film) {
     super();
     this._state = this.#convertDataToState(film);
@@ -37,10 +33,6 @@ export default class FilmCardView extends AbstractStatefulView{
     this.#isWatchlistFilm = this._state.userDetails.watchlist;
     this.#isWatchedFilm = this._state.userDetails.alreadyWatched;
     this.#isFavoriteFilm = this._state.userDetails.favorite;
-
-    this.#watchlistButton = this.element.querySelector('.film-card__controls-item--add-to-watchlist');
-    this.#watchedButton = this.element.querySelector('.film-card__controls-item--mark-as-watched');
-    this.#favoriteButton = this.element.querySelector('.film-card__controls-item--favorite');
   }
 
   get template() {
@@ -83,17 +75,17 @@ export default class FilmCardView extends AbstractStatefulView{
 
   setWatchlistClickHandler = (callback) => {
     this._callback.watchlistClick = callback;
-    this.#watchlistButton.addEventListener('click', this.#watchlistClickHandler);
+    this.element.querySelector('.film-card__controls-item--add-to-watchlist').addEventListener('click', this.#watchlistClickHandler);
   };
 
   setWatchedClickHandler = (callback) => {
     this._callback.watchedClick = callback;
-    this.#watchedButton.addEventListener('click', this.#watchedClickHandler);
+    this.element.querySelector('.film-card__controls-item--mark-as-watched').addEventListener('click', this.#watchedClickHandler);
   };
 
   setFavoriteClickHandler = (callback) => {
     this._callback.favoriteClick = callback;
-    this.#favoriteButton.addEventListener('click', this.#favoriteClickHandler);
+    this.element.querySelector('.film-card__controls-item--favorite').addEventListener('click', this.#favoriteClickHandler);
   };
 
   #clickHandler = (evt) => {
@@ -102,15 +94,18 @@ export default class FilmCardView extends AbstractStatefulView{
     }
   };
 
-  #watchlistClickHandler = () => {
-    this._callback.watchlistClick();
+  #watchlistClickHandler = (evt) => {
+    const section = evt.target.closest('div.films-list__container').previousElementSibling.textContent;
+    this._callback.watchlistClick(section);
   };
 
-  #watchedClickHandler = () => {
-    this._callback.watchedClick();
+  #watchedClickHandler = (evt) => {
+    const section = evt.target.closest('div.films-list__container').previousElementSibling.textContent;
+    this._callback.watchedClick(section);
   };
 
-  #favoriteClickHandler = () => {
-    this._callback.favoriteClick();
+  #favoriteClickHandler = (evt) => {
+    const section = evt.target.closest('div.films-list__container').previousElementSibling.textContent;
+    this._callback.favoriteClick(section);
   };
 }

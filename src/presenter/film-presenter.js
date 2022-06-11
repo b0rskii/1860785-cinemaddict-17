@@ -87,24 +87,24 @@ export default class FilmPresenter {
     }
   };
 
-  #watchlistControlClickHandler = () => {
+  #watchlistControlClickHandler = (section) => {
     const film = JSON.parse(JSON.stringify(this.#film));
 
     film.userDetails.watchlist = !(film.userDetails.watchlist);
-    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.MAJOR, film);
+    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.MAJOR, film, section);
   };
 
-  #watchedControlClickHandler = () => {
+  #watchedControlClickHandler = (section) => {
     const film = JSON.parse(JSON.stringify(this.#film));
 
     film.userDetails.alreadyWatched = !(film.userDetails.alreadyWatched);
-    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.MAJOR, film);
+    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.MAJOR, film, section);
   };
 
-  #favoriteControlClickHandler = () => {
+  #favoriteControlClickHandler = (section) => {
     const film = JSON.parse(JSON.stringify(this.#film));
 
     film.userDetails.favorite = !(film.userDetails.favorite);
-    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.MAJOR, film);
+    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.MAJOR, film, section);
   };
 }

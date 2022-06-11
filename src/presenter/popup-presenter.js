@@ -108,6 +108,7 @@ export default class PopupPresenter {
       };
 
       this.#controlsComponent.shake(resetControlsState);
+      this.#newCommentComponent.setFormSubmitHandler(this.#formSubmitHandler);
       return;
     }
 
@@ -119,6 +120,7 @@ export default class PopupPresenter {
       };
 
       this.#newCommentComponent.shake(resetFormState);
+      this.#newCommentComponent.setFormSubmitHandler(this.#formSubmitHandler);
       return;
     }
 
@@ -130,6 +132,7 @@ export default class PopupPresenter {
       };
 
       this.#commentsComponent.shake(resetCommentsState);
+      this.#newCommentComponent.setFormSubmitHandler(this.#formSubmitHandler);
       return;
     }
 

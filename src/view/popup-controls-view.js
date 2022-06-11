@@ -7,20 +7,12 @@ export default class PopupControlsView extends AbstractStatefulView {
   #isWatchedFilm = null;
   #isFavoriteFilm = null;
 
-  #watchlistButton = null;
-  #watchedButton = null;
-  #favoriteButton = null;
-
   constructor (film) {
     super();
     this._state = this.#convertDataToState(film);
     this.#isWatchlistFilm = this._state.userDetails.watchlist;
     this.#isWatchedFilm = this._state.userDetails.alreadyWatched;
     this.#isFavoriteFilm = this._state.userDetails.favorite;
-
-    this.#watchlistButton = this.element.querySelector('.film-details__control-button--watchlist');
-    this.#watchedButton = this.element.querySelector('.film-details__control-button--watched');
-    this.#favoriteButton = this.element.querySelector('.film-details__control-button--favorite');
   }
 
   get template() {
@@ -43,17 +35,17 @@ export default class PopupControlsView extends AbstractStatefulView {
 
   setWatchlistClickHandler = (callback) => {
     this._callback.watchlistClick = callback;
-    this.#watchlistButton.addEventListener('click', this.#watchlistClickHandler);
+    this.element.querySelector('.film-details__control-button--watchlist').addEventListener('click', this.#watchlistClickHandler);
   };
 
   setWatchedClickHandler = (callback) => {
     this._callback.watchedClick = callback;
-    this.#watchedButton.addEventListener('click', this.#watchedClickHandler);
+    this.element.querySelector('.film-details__control-button--watched').addEventListener('click', this.#watchedClickHandler);
   };
 
   setFavoriteClickHandler = (callback) => {
     this._callback.favoriteClick = callback;
-    this.#favoriteButton.addEventListener('click', this.#favoriteClickHandler);
+    this.element.querySelector('.film-details__control-button--favorite').addEventListener('click', this.#favoriteClickHandler);
   };
 
   #watchlistClickHandler = () => {

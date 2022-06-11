@@ -39,7 +39,6 @@ export default class MainPresenter {
   #filmsModel = null;
   #commentsModel = null;
 
-  #filmPresenterAllRendered = new Map();
   #filmPresenter = new Map();
   #filmPresenterFirstExtra = new Map();
   #filmPresenterSecondExtra = new Map();
@@ -152,16 +151,27 @@ export default class MainPresenter {
     render(this.#noFilmsComponent, this.#filmsSectionComponent.element);
   };
 
-  #handleViewAction = async (actionType, updateType, update) => {
+  #definePresenter = (section) => {
+    switch (section) {
+      case ExtraSection.FIRST_TITLE:
+        return this.#filmPresenterFirstExtra;
+      case ExtraSection.SECOND_TITLE:
+        return this.#filmPresenterSecondExtra;
+      default:
+        return this.#filmPresenter;
+    }
+  };
+
+  #handleViewAction = async (actionType, updateType, update, section = null) => {
     this.#uiBlocker.block();
 
     switch (actionType) {
       case UserAction.UPDATE_FILM:
-        this.#filmPresenterAllRendered.get(update.id).setSaving();
+        this.#definePresenter(section).get(update.id).setSaving();
         try {
           await this.#filmsModel.updateFilm(updateType, update);
         } catch {
-          this.#filmPresenterAllRendered.get(update.id).setAborting();
+          this.#definePresenter(section).get(update.id).setAborting();
         }
         break;
 
@@ -313,8 +323,6 @@ export default class MainPresenter {
 
     filmPresenter.init(filmData, this.getFilmComments);
 
-    this.#filmPresenterAllRendered.set(filmData.id, filmPresenter);
-
     switch (container) {
       case this.#filmsListContainerComponent.element:
         this.#filmPresenter.set(filmData.id, filmPresenter);
@@ -389,13 +397,6 @@ export default class MainPresenter {
   #clearFilmsList = () => {
     this.#filmPresenter.forEach((item) => item.destroy());
     this.#filmPresenter.clear();
-
-    for (const key of this.#filmPresenterAllRendered.keys()) {
-      if (!this.#filmPresenterFirstExtra.has(key) && !this.#filmPresenterSecondExtra.has(key)) {
-        this.#filmPresenterAllRendered.delete(key);
-      }
-    }
-
     this.#renderedFilmCardsCount = 0;
     remove(this.#showMoreButtonComponent);
   };
