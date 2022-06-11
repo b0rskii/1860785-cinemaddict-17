@@ -220,9 +220,6 @@ export default class MainPresenter {
         this.#renderNavigation();
         break;
 
-      case UpdateType.PATCH:
-        break;
-
       case UpdateType.MINOR:
         this.#handleFilmChange(data);
         this.#updateFilmsList({updateSecondExtra: true});
