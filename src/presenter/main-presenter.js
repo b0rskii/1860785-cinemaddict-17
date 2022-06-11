@@ -125,12 +125,13 @@ export default class MainPresenter {
   };
 
   #renderInitialFilmsLists = () => {
-    render(this.#filmsSectionComponent, this.#container);
-
     if (this.#isLoading) {
-      this.#renderLoading();
+      render(this.#filmsSectionComponent, this.#container);
+      render(this.#loadingComponent, this.#filmsSectionComponent.element);
       return;
     }
+
+    remove(this.#loadingComponent);
 
     if (this.sourceFilms.length === 0) {
       this.#renderNoFilms();
@@ -141,10 +142,6 @@ export default class MainPresenter {
       this.#renderPartFilmCards(RenderCount.FILM_CARDS, this.sourceFilms);
       this.#renderExtra({first: true, second: true});
     }
-  };
-
-  #renderLoading = () => {
-    render(this.#loadingComponent, this.#filmsSectionComponent.element);
   };
 
   #renderNoFilms = () => {
@@ -214,8 +211,6 @@ export default class MainPresenter {
     switch (updateType) {
       case UpdateType.INIT:
         this.#isLoading = false;
-        remove(this.#filmsSectionComponent);
-        remove(this.#loadingComponent);
         this.#renderInitialFilmsLists();
         this.#renderNavigation();
         break;
