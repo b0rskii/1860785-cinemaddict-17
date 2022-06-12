@@ -254,8 +254,10 @@ export default class MainPresenter {
   #updateFilmsList = ({updateFirstExtra = false, updateSecondExtra = false} = {}) => {
     const renderedFilmsCount = this.#renderedFilmCardsCount;
 
-    if (this.films.length === renderedFilmsCount - 1) {
+    if (this.films.length === renderedFilmsCount - 1 && renderedFilmsCount % RenderCount.FILM_CARDS !== 0) {
       this.#updateFilteredFilms(renderedFilmsCount - 1);
+    } else if (this.films.length === renderedFilmsCount + 1 && renderedFilmsCount % RenderCount.FILM_CARDS !== 0) {
+      this.#updateFilteredFilms(renderedFilmsCount + 1);
     } else {
       this.#updateFilteredFilms(renderedFilmsCount);
     }
