@@ -19,7 +19,7 @@ export default class UserView extends AbstractView {
   }
 
   #defineUserRank = () => {
-    if (this.#watchedFilmsCount === 0) {
+    if (this.#watchedFilmsCount < 1) {
       this.element.querySelector('.profile__rating').remove();
     }
 

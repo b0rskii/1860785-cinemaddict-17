@@ -4,7 +4,10 @@ import {Emoji} from '../const';
 
 dayjs.extend(relativeTime);
 
-const formatDescription = (string, maxLength = 140) => {
+const FILM_CARD_DESCRIPTION_MAX_LENGTH = 140;
+const MINUTES_DIVISOR = 60;
+
+const formatDescription = (string, maxLength = FILM_CARD_DESCRIPTION_MAX_LENGTH) => {
   if (string.length > maxLength) {
     return string.replace(string.substring(maxLength - 1), '...');
   }
@@ -12,10 +15,10 @@ const formatDescription = (string, maxLength = 140) => {
 };
 
 const formatRuntime = (minutes) => {
-  if ((minutes / 60) >= 1) {
-    return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
+  if ((minutes / MINUTES_DIVISOR) >= 1) {
+    return `${Math.floor(minutes / MINUTES_DIVISOR)}h ${minutes % MINUTES_DIVISOR}m`;
   }
-  return `${minutes % 60}m`;
+  return `${minutes % MINUTES_DIVISOR}m`;
 };
 
 const formatDate = (date, format) => dayjs(date).format(format);

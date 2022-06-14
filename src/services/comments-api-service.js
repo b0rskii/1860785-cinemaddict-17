@@ -13,17 +13,11 @@ export default class CommentsApiService extends ApiService {
       headers: new Headers({'Content-Type': 'application/json'}),
     });
 
-    const parsedResponse = await ApiService.parseResponse(response);
-
-    return parsedResponse;
+    return await ApiService.parseResponse(response);
   };
 
-  deleteComment = async (comment) => {
-    const response = await this._load({
-      url: `comments/${comment.id}`,
-      method: Method.DELETE
-    });
-
-    return response;
-  };
+  deleteComment = async (comment) => await this._load({
+    url: `comments/${comment.id}`,
+    method: Method.DELETE
+  });
 }
